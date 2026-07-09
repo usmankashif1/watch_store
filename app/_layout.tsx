@@ -1,24 +1,37 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { useFonts } from "expo-font";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import Splash from "@/src/screens/Splash";
+import Home from "@/src/screens/Home";
+import { useEffect, useState } from "react";
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
-
+const Stack = createNativeStackNavigator()
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const [showSplash, setShowSplash] = useState(true);
+
+  const [fontsLoaded] = useFonts({
+    KanitRegular: require("../src/assets/fonts/Kanit-Regular.ttf"),
+    KanitMedium: require("../src/assets/fonts/Kanit-Medium.ttf"),
+    KanitSemiBold: require("../src/assets/fonts/Kanit-SemiBold.ttf"),
+    KanitBold: require("../src/assets/fonts/Kanit-Bold.ttf"),
+  });
+
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {showSplash ? (
+        <Stack.Screen name="Splash" component={Splash} />
+      ) : (
+        <Stack.Screen name="Home" component={Home} />
+      )}
+    </Stack.Navigator>
   );
 }
