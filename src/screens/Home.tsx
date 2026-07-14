@@ -38,8 +38,10 @@ export default function Home({ navigation }: any) {
         )
 
         return {
+            overflow: "hidden",
+            borderRadius: withTiming(active.value ? 28 : 0),
             transform: [
-                { perspective: 1000 }
+                { perspective: 3000 }
                 ,
                 {
                     translateX: withSpring(active.value ? 240 : 0),
@@ -47,78 +49,81 @@ export default function Home({ navigation }: any) {
                 {
                     scale: withTiming(active.value ? 0.82 : 1),
                 },
-                {
-                    rotateY: `${rotateY}deg`
-                }
-            ],
-            borderRadius: withTiming(active.value ? 28 : 0)
+                // {
+                //     rotateY: `${rotateY}deg`
+                // }
+            ]
         }
     })
 
-    const AnimatedSafeAreaView = Animated.createAnimatedComponent(SafeAreaView);
+    const AnimatedSafeAreaView = Animated.createAnimatedComponent(View);
 
     return (
-        <>
+        <View style={{ flex: 1 }}>
+
             <Drawer />
             <AnimatedSafeAreaView style={[styles.screen, animatedStyle]}>
-                <ScrollView
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={styles.content}
-                >
-                    <Header active={active} />
+                <SafeAreaView style={{ flex: 1 }}>
 
-                    <SectionHeader smallTitle="FEATURED" title="PRODUCTS" />
+                    <ScrollView
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={styles.content}
+                    >
+                        <Header active={active} />
 
-                    <View style={styles.featureCard}>
-                        <View style={styles.featureTextBox}>
-                            <Text style={styles.arrival}>New Arrival</Text>
-                            <Text style={styles.featureTitle}>BREMONT</Text>
+                        <SectionHeader smallTitle="FEATURED" title="PRODUCTS" />
 
-                            <Text style={styles.featureDesc}>
-                                Lorem ipsum dolor sit amet, consectetur adipisicing elit
-                            </Text>
+                        <View style={styles.featureCard}>
+                            <View style={styles.featureTextBox}>
+                                <Text style={styles.arrival}>New Arrival</Text>
+                                <Text style={styles.featureTitle}>BREMONT</Text>
 
-                            <TouchableOpacity style={styles.buyButton}>
-                                <Text style={styles.buyText}>BUY NOW</Text>
-                                <Image
-                                    source={require("../assets/icons/NextButtonIcons.png")}
-                                    style={styles.arrowIcon}
-                                />
-                            </TouchableOpacity>
+                                <Text style={styles.featureDesc}>
+                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit
+                                </Text>
+
+                                <TouchableOpacity style={styles.buyButton}>
+                                    <Text style={styles.buyText}>BUY NOW</Text>
+                                    <Image
+                                        source={require("../assets/icons/NextButtonIcons.png")}
+                                        style={styles.arrowIcon}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+
+                            <Image
+                                source={require("../assets/images/watches/Bremont.png")}
+                                style={styles.featureWatch}
+                                resizeMode="contain"
+                            />
                         </View>
 
-                        <Image
-                            source={require("../assets/images/watches/Bremont.png")}
-                            style={styles.featureWatch}
-                            resizeMode="contain"
+                        <SectionHeader smallTitle="TRENDING" title="PRODUCTS" />
+
+                        <FlatList
+                            data={products}
+                            keyExtractor={(item) => item.id}
+                            numColumns={2}
+                            scrollEnabled={false}
+                            columnWrapperStyle={styles.productsRow}
+                            renderItem={({ item }) => (
+                                <ProductCard
+                                    product={item}
+                                    onPress={() =>
+                                        navigation.navigate("ProductDetail", {
+                                            product: item,
+                                        })
+                                    }
+                                />
+                            )}
                         />
-                    </View>
 
-                    <SectionHeader smallTitle="TRENDING" title="PRODUCTS" />
+                    </ScrollView>
+                </SafeAreaView>
 
-                    <FlatList
-                        data={products}
-                        keyExtractor={(item) => item.id}
-                        numColumns={2}
-                        scrollEnabled={false}
-                        columnWrapperStyle={styles.productsRow}
-                        renderItem={({ item }) => (
-                            <ProductCard
-                                product={item}
-                                onPress={() =>
-                                    navigation.navigate("ProductDetail", {
-                                        product: item,
-                                    })
-                                }
-                            />
-                        )}
-                    />
-
-
-                    <Overlay active={active} />
-                </ScrollView>
+                <Overlay active={active} />
             </AnimatedSafeAreaView>
-        </>
+        </View >
     );
 }
 
@@ -128,6 +133,8 @@ const styles = StyleSheet.create({
     screen: {
         flex: 1,
         backgroundColor: Colors.secondary,
+        overflow: "hidden",
+
     },
 
     content: {

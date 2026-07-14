@@ -2,6 +2,8 @@ import React from 'react'
 import { Image, StyleSheet, Text, View } from 'react-native'
 import Colors from '../utlis/colors'
 import { RF, RH, RW } from '../utlis/responsive'
+import { DRAWER_LIST } from '../data/DrawerList'
+import DrawerItem from './DrawerItem'
 
 type Props = {}
 
@@ -12,7 +14,14 @@ const Drawer = (props: Props) => {
                 <Image style={styles.drawerLogo} source={require("../assets/icons/Logo.png")} />
                 <Text style={styles.userName}>Usman Kashif</Text>
             </View>
-
+            <View style={styles.menuContainer}>
+                {DRAWER_LIST.map((item) => (
+                    <DrawerItem
+                        key={item.id}
+                        item={item}
+                    />
+                ))}
+            </View>
         </View>
     )
 }
@@ -23,7 +32,7 @@ const styles = StyleSheet.create({
     container: {
         ...StyleSheet.absoluteFillObject,
         backgroundColor: "#071531",
-        zIndex: -99
+        // zIndex: -99
     },
     drawerLogo: {
         height: RH(200),
@@ -42,5 +51,8 @@ const styles = StyleSheet.create({
         marginHorizontal: RW(40),
         width: RW(200),
         paddingBottom: RH(14)
-    }
+    },
+    menuContainer: {
+        marginTop: RH(10),
+    },
 })

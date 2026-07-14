@@ -7,8 +7,18 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import Splash from "../screens/Splash";
 import Home from "../screens/Home";
 import ProductDetail from "../screens/ProductDetail";
+import Profile from "../screens/Profile";
 
 const Stack = createStackNavigator();
+
+
+export type RootStackParamList = {
+    Splash: undefined;
+    Home: undefined;
+    ProductDetail: undefined;
+    Profile: undefined;
+}
+
 
 export default function RootNavigation() {
     const [showSplash, setShowSplash] = useState(true);
@@ -52,6 +62,7 @@ export default function RootNavigation() {
                         <>
                             <Stack.Screen name="Home" component={Home} />
                             <Stack.Screen name="ProductDetail" component={ProductDetail} />
+                            <Stack.Screen name="Profile" component={Profile} />
                         </>
                     )}
                 </Stack.Navigator>
