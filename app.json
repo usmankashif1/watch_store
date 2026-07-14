@@ -4,7 +4,7 @@
     "slug": "WatchStore",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icons/Logo.png",
+    "icon": "./src/assets/icons/Logo.png",
     "scheme": "watchstore",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -14,9 +14,9 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/icons/Logo.png",
-        "backgroundImage": "./assets/icons/Logo.png",
-        "monochromeImage": "./assets/icons/Logo.png"
+        "foregroundImage": "./src/assets/icons/Logo.png",
+        "backgroundImage": "./src/assets/icons/Logo.png",
+        "monochromeImage": "./src/assets/icons/Logo.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -24,14 +24,14 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/icons/Logo.png"
+      "favicon": "./src/assets/icons/Logo.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/icons/Logo.png",
+          "image": "./src/assets/icons/Logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -40,7 +40,8 @@
           }
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,
