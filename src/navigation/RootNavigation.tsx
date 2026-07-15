@@ -8,6 +8,8 @@ import Splash from "../screens/Splash";
 import Home from "../screens/Home";
 import ProductDetail from "../screens/ProductDetail";
 import Profile from "../screens/Profile";
+import MyOrders from "../screens/MyOrders";
+import Favorites from "../screens/Favorites";
 
 const Stack = createStackNavigator();
 
@@ -17,6 +19,8 @@ export type RootStackParamList = {
     Home: undefined;
     ProductDetail: undefined;
     Profile: undefined;
+    MyOrders: undefined;
+    Favorites: undefined;
 }
 
 
@@ -63,6 +67,8 @@ export default function RootNavigation() {
                             <Stack.Screen name="Home" component={Home} />
                             <Stack.Screen name="ProductDetail" component={ProductDetail} />
                             <Stack.Screen name="Profile" component={Profile} />
+                            <Stack.Screen name="MyOrders" component={MyOrders} />
+                            <Stack.Screen name="Favorites" component={Favorites} />
                         </>
                     )}
                 </Stack.Navigator>

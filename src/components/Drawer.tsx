@@ -4,10 +4,13 @@ import Colors from '../utlis/colors'
 import { RF, RH, RW } from '../utlis/responsive'
 import { DRAWER_LIST } from '../data/DrawerList'
 import DrawerItem from './DrawerItem'
+import { SharedValue } from 'react-native-reanimated'
 
-type Props = {}
+type Props = {
+    active: SharedValue<boolean>
+}
 
-const Drawer = (props: Props) => {
+const Drawer = ({ active }: Props) => {
     return (
         <View style={styles.container}>
             <View style={styles.LogoUserContainer}>
@@ -19,6 +22,7 @@ const Drawer = (props: Props) => {
                     <DrawerItem
                         key={item.id}
                         item={item}
+                        active={active}
                     />
                 ))}
             </View>

@@ -4,19 +4,22 @@ import { DrawerItemType } from "../data/DrawerList";
 import useTypeSafeNavigation from "../hooks/useTypeSafeNavigation";
 import { RF, RH, RW } from "../utlis/responsive";
 import Colors from "../utlis/colors";
+import { RootStackParamList } from "../navigation/RootNavigation";
+import { SharedValue } from "react-native-reanimated";
 
 type Props = {
     item: DrawerItemType;
+    active: SharedValue<boolean>;
 };
 
-const DrawerItem = ({ item }: Props) => {
+const DrawerItem = ({ item, active }: Props) => {
     const navigation = useTypeSafeNavigation();
 
     const Icon = item.iconType;
 
     return (
         <Pressable
-            onPress={() => navigation.navigate(item.screen)}
+            onPress={() => { navigation.navigate(item.screen as keyof RootStackParamList); active.value = !active.value }}
             style={({ pressed }) => [
                 styles.container,
                 pressed && styles.pressed,
@@ -31,7 +34,7 @@ const DrawerItem = ({ item }: Props) => {
             </View>
 
             <Text style={styles.title}>{item.title}</Text>
-        </Pressable>
+        </Pressable >
     );
 };
 

@@ -61,7 +61,7 @@ export default function Home({ navigation }: any) {
     return (
         <View style={{ flex: 1 }}>
 
-            <Drawer />
+            <Drawer active={active} />
             <AnimatedSafeAreaView style={[styles.screen, animatedStyle]}>
                 <SafeAreaView style={{ flex: 1 }}>
 

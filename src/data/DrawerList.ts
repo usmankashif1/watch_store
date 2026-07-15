@@ -1,4 +1,6 @@
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import Feather from '@expo/vector-icons/Feather';
 import { ComponentType } from 'react';
 
 
@@ -27,18 +29,18 @@ export const DRAWER_LIST: DrawerItemType[] = [
     },
     {
         id: 2,
-        title: "Contacts",
-        icon: "people-outline",
-        iconType: FontAwesome6,
-        screen: "ContactsScreen",
+        title: "My Orders",
+        icon: "shopping-bag",
+        iconType: Feather,
+        screen: "MyOrders",
     },
-    // {
-    //     id: 3,
-    //     title: "Calls",
-    //     icon: "call-outline",
-    //     // iconType: Ionicons,
-    //     screen: "CallsScreen",
-    // },
+    {
+        id: 3,
+        title: "Favorites",
+        icon: "favorite-border",
+        iconType: MaterialIcons,
+        screen: "Favorites",
+    },
     // {
     //     id: 4,
     //     title: "Saved Messages",
