@@ -3,13 +3,14 @@ import React from 'react'
 import { RH, RS, RW } from '../utlis/responsive'
 import Colors from '../utlis/colors'
 import { SharedValue } from 'react-native-reanimated'
+import { useNavigation } from 'expo-router'
 
 type Props = {
     active: SharedValue<boolean>
 }
 
 const Header = ({ active }: Props) => {
-    ``
+    const navigation = useNavigation()
     return (
         <View style={styles.header}>
             <TouchableOpacity onPress={() => { active.value = !active.value }}>
@@ -27,7 +28,7 @@ const Header = ({ active }: Props) => {
                     />
                 </TouchableOpacity>
 
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate("Cart")}>
                     <Image
                         source={require("../assets/icons/CartIcon.png")}
                         style={[styles.headerIcon, { width: RS(30), height: RS(30) }]}

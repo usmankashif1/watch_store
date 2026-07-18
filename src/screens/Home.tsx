@@ -49,9 +49,9 @@ export default function Home({ navigation }: any) {
                 {
                     scale: withTiming(active.value ? 0.82 : 1),
                 },
-                // {
-                //     rotateY: `${rotateY}deg`
-                // }
+                {
+                    rotateY: `${rotateY}deg`
+                }
             ]
         }
     })

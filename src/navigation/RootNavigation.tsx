@@ -10,6 +10,7 @@ import ProductDetail from "../screens/ProductDetail";
 import Profile from "../screens/Profile";
 import MyOrders from "../screens/MyOrders";
 import Favorites from "../screens/Favorites";
+import Cart from "../screens/Cart";
 
 const Stack = createStackNavigator();
 
@@ -21,6 +22,7 @@ export type RootStackParamList = {
     Profile: undefined;
     MyOrders: undefined;
     Favorites: undefined;
+    Cart: undefined;
 }
 
 
@@ -69,6 +71,7 @@ export default function RootNavigation() {
                             <Stack.Screen name="Profile" component={Profile} />
                             <Stack.Screen name="MyOrders" component={MyOrders} />
                             <Stack.Screen name="Favorites" component={Favorites} />
+                            <Stack.Screen name="Cart" component={Cart} />
                         </>
                     )}
                 </Stack.Navigator>
