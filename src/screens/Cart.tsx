@@ -8,51 +8,88 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useSelector } from "react-redux";
 
-import Colors from "../utlis/colors";
 import Fonts from "../constants/fonts";
+import { useAppDispatch } from "../store/hooks";
+import {
+  decreaseQuantity,
+  increaseQuantity,
+  removeFromCart,
+} from "../store/slices/cartSlice";
+import Colors from "../utlis/colors";
 import { RF, RH, RS, RW } from "../utlis/responsive";
 
-const cartItems = [
-  {
-    id: "1",
-    brand: "REVUE THOMMEN",
-    name: "Heritage Automatic",
-    image: require("../assets/images/watches/Thommen_Watches.png"),
-    price: 520,
-    quantity: 1,
-  },
-  {
-    id: "2",
-    brand: "BREMONT",
-    name: "MB Savanna",
-    image: require("../assets/images/watches/Bremont.png"),
-    price: 690,
-    quantity: 2,
-  },
-  {
-    id: "3",
-    brand: "CAT",
-    name: "Classic Black",
-    image: require("../assets/images/watches/CAT_Watches.png"),
-    price: 340,
-    quantity: 1,
-  },
-];
-
 export default function Cart({ navigation }: any) {
+  const dispatch = useAppDispatch();
+
+  const cartItems = useSelector((state: any) =>
+    Array.isArray(state?.cart?.items) ? state.cart.items : []
+  );
+
   const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum: number, item: any) =>
+      sum + Number(item.price || 0) * Number(item.quantity || 0),
     0
   );
 
-  const shipping = 0;
-  const tax = 22;
-  const total = subtotal + tax;
+  const shipping = subtotal > 0 ? 0 : 0;
+  const tax = subtotal > 0 ? 22 : 0;
+  const total = subtotal + shipping + tax;
+
+  if (cartItems?.length === 0) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={require("../assets/icons/BackArrow.png")}
+              style={styles.back}
+            />
+          </TouchableOpacity>
+
+          <View>
+            <Text style={styles.smallTitle}>SHOPPING</Text>
+            <Text style={styles.title}>MY CART</Text>
+          </View>
+
+          <View style={{ width: RS(28) }} />
+        </View>
+
+        <View style={styles.emptyContainer}>
+          <Image
+            source={require("../assets/icons/CartIcon.png")}
+            style={styles.emptyIcon}
+          />
+
+          <Text style={styles.emptyTitle}>
+            Your Cart is Empty
+          </Text>
+
+          <Text style={styles.emptySubtitle}>
+            Looks like you haven't added{"\n"}
+            any watches yet.
+          </Text>
+
+          <TouchableOpacity
+            style={styles.checkoutBtn}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.checkoutText}>
+              CONTINUE SHOPPING
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   const renderItem = ({ item }: any) => (
     <View style={styles.card}>
-      <TouchableOpacity style={styles.deleteBtn}>
+      <TouchableOpacity
+        style={styles.deleteBtn}
+        onPress={() => dispatch(removeFromCart(item.id))}
+      >
         {/* <Image
           source={require("../assets/icons/Delete.png")}
           style={styles.deleteIcon}
@@ -66,23 +103,41 @@ export default function Cart({ navigation }: any) {
       />
 
       <View style={styles.info}>
-        <Text style={styles.brand}>{item.brand}</Text>
+        <Text style={styles.brand}>
+          {item.brand}
+        </Text>
 
-        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.name}>
+          {item.name}
+        </Text>
+
+        <Text style={styles.price}>
+          ${item.price}
+        </Text>
 
         <View style={styles.quantityRow}>
-          <TouchableOpacity style={styles.qtyBtn}>
+          <TouchableOpacity
+            style={styles.qtyBtn}
+            onPress={() =>
+              dispatch(decreaseQuantity(item.id))
+            }
+          >
             <Text style={styles.qtySymbol}>−</Text>
           </TouchableOpacity>
 
-          <Text style={styles.qty}>{item.quantity}</Text>
+          <Text style={styles.qty}>
+            {item.quantity}
+          </Text>
 
-          <TouchableOpacity style={styles.qtyBtn}>
+          <TouchableOpacity
+            style={styles.qtyBtn}
+            onPress={() =>
+              dispatch(increaseQuantity(item.id))
+            }
+          >
             <Text style={styles.qtySymbol}>+</Text>
           </TouchableOpacity>
         </View>
-
-        <Text style={styles.price}>${item.price}</Text>
       </View>
     </View>
   );
@@ -90,7 +145,9 @@ export default function Cart({ navigation }: any) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+        >
           <Image
             source={require("../assets/icons/BackArrow.png")}
             style={styles.back}
@@ -98,40 +155,85 @@ export default function Cart({ navigation }: any) {
         </TouchableOpacity>
 
         <View>
-          <Text style={styles.smallTitle}>SHOPPING</Text>
-          <Text style={styles.title}>MY CART</Text>
+          <Text style={styles.smallTitle}>
+            SHOPPING
+          </Text>
+
+          <Text style={styles.title}>
+            MY CART
+          </Text>
         </View>
 
         <View style={{ width: RS(28) }} />
       </View>
 
-      <FlatList
-        data={cartItems}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-        ListFooterComponent={
-          <View style={styles.summary}>
-            <SummaryRow label="Subtotal" value={`$${subtotal}`} />
-            <SummaryRow label="Shipping" value="Free" />
-            <SummaryRow label="Tax" value={`$${tax}`} />
+      {cartItems?.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Image
+            source={require("../assets/icons/CartIcon.png")}
+            style={styles.emptyImage}
+          />
 
-            <View style={styles.divider} />
+          <Text style={styles.emptyTitle}>
+            Your Cart is Empty
+          </Text>
 
-            <SummaryRow
-              label="Total"
-              value={`$${total}`}
-              bold
-            />
+          <Text style={styles.emptySubtitle}>
+            Looks like you haven't added any watches yet.
+          </Text>
 
-            <TouchableOpacity style={styles.checkoutBtn}>
-              <Text style={styles.checkoutText}>
-                PROCEED TO CHECKOUT
-              </Text>
-            </TouchableOpacity>
-          </View>
-        }
-      />
+          <TouchableOpacity
+            style={styles.shopButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.shopButtonText}>
+              CONTINUE SHOPPING
+            </Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <FlatList
+          data={cartItems}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: RH(30) }}
+          ListFooterComponent={
+            <View style={styles.summary}>
+              <SummaryRow
+                label="Subtotal"
+                value={`$${subtotal?.toFixed(2)}`}
+              />
+
+              <SummaryRow
+                label="Shipping"
+                value="Free"
+              />
+
+              <SummaryRow
+                label="Tax"
+                value={`$${tax?.toFixed(2)}`}
+              />
+
+              <View style={styles.divider} />
+
+              <SummaryRow
+                label="Total"
+                value={`$${total?.toFixed(2)}`}
+                bold
+              />
+
+              <TouchableOpacity style={styles.checkoutBtn}>
+                <Text style={styles.checkoutText}>
+                  PROCEED TO CHECKOUT
+                </Text>
+              </TouchableOpacity>
+            </View>
+          }
+        />
+      )}
+
+
     </SafeAreaView>
   );
 }
@@ -150,7 +252,7 @@ function SummaryRow({
       <Text
         style={[
           styles.summaryLabel,
-          bold && { color: Colors.white },
+          bold && styles.totalLabel,
         ]}
       >
         {label}
@@ -159,7 +261,7 @@ function SummaryRow({
       <Text
         style={[
           styles.summaryValue,
-          bold && { color: Colors.primary },
+          bold && styles.totalValue,
         ]}
       >
         {value}
@@ -169,168 +271,255 @@ function SummaryRow({
 }
 
 
+
 const styles = StyleSheet.create({
-container:{
-flex:1,
-backgroundColor:Colors.secondary,
-paddingHorizontal:RW(20),
-},
+  container: {
+    flex: 1,
+    backgroundColor: Colors.secondary,
+    paddingHorizontal: RW(20),
+  },
 
-header:{
-flexDirection:"row",
-justifyContent:"space-between",
-alignItems:"center",
-marginBottom:RH(25),
-},
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: RH(25),
+  },
 
-back:{
-width:RS(30),
-height:RS(30),
-resizeMode:"contain",
-},
+  back: {
+    width: RS(30),
+    height: RS(30),
+    resizeMode: "contain",
+  },
 
-smallTitle:{
-color:Colors.primary,
-fontSize:RF(10),
-fontFamily:Fonts.semiBold,
-letterSpacing:RW(3),
-textAlign:"center",
-},
+  smallTitle: {
+    color: Colors.primary,
+    fontSize: RF(11),
+    fontFamily: Fonts.semiBold,
+    letterSpacing: RW(3),
+    textAlign: "center",
+  },
 
-title:{
-color:Colors.white,
-fontSize:RF(24),
-fontFamily:Fonts.bold,
-letterSpacing:RW(2),
-},
+  title: {
+    color: Colors.white,
+    fontSize: RF(24),
+    fontFamily: Fonts.bold,
+    letterSpacing: RW(2),
+    marginTop: RH(3),
+  },
 
-card:{
-backgroundColor:"#14264D",
-borderRadius:RS(22),
-padding:RS(18),
-marginBottom:RH(20),
-flexDirection:"row",
-},
+  /* Empty */
 
-deleteBtn:{
-position:"absolute",
-right:RW(15),
-top:RH(15),
-zIndex:2,
-},
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
-deleteIcon:{
-width:RS(22),
-height:RS(22),
-resizeMode:"contain",
-tintColor:"#FF6B6B",
-},
+  emptyIcon: {
+    width: RS(90),
+    height: RS(90),
+    tintColor: Colors.primary,
+    resizeMode: "contain",
+    marginBottom: RH(20),
+  },
 
-watchImage:{
-width:RW(95),
-height:RH(120),
-},
+  emptyTitle: {
+    color: Colors.white,
+    fontSize: RF(26),
+    fontFamily: Fonts.bold,
+    marginBottom: RH(10),
+  },
 
-info:{
-flex:1,
-marginLeft:RW(16),
-justifyContent:"space-between",
-},
+  emptySubtitle: {
+    color: "#A8B7D8",
+    textAlign: "center",
+    fontSize: RF(15),
+    lineHeight: RH(24),
+    fontFamily: Fonts.regular,
+    marginBottom: RH(35),
+  },
 
-brand:{
-color:Colors.primary,
-fontSize:RF(10),
-fontFamily:Fonts.semiBold,
-letterSpacing:RW(2),
-},
+  /* Card */
 
-name:{
-color:Colors.white,
-fontSize:RF(18),
-fontFamily:Fonts.medium,
-marginTop:RH(4),
-},
+  card: {
+    backgroundColor: "#132448",
+    borderRadius: RS(24),
+    flexDirection: "row",
+    padding: RS(18),
+    marginBottom: RH(18),
+    overflow: "hidden",
 
-quantityRow:{
-flexDirection:"row",
-alignItems:"center",
-marginTop:RH(12),
-},
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
 
-qtyBtn:{
-width:RS(28),
-height:RS(28),
-borderRadius:RS(14),
-backgroundColor:Colors.primary,
-justifyContent:"center",
-alignItems:"center",
-},
+    elevation: 6,
+  },
 
-qtySymbol:{
-color:Colors.secondary,
-fontSize:RF(18),
-fontFamily:Fonts.bold,
-},
+  deleteBtn: {
+    position: "absolute",
+    top: RH(16),
+    right: RW(16),
+    zIndex: 5,
+  },
 
-qty:{
-color:Colors.white,
-fontSize:RF(16),
-marginHorizontal:RW(15),
-fontFamily:Fonts.medium,
-},
+  deleteIcon: {
+    width: RS(22),
+    height: RS(22),
+    tintColor: "#FF6B6B",
+    resizeMode: "contain",
+  },
 
-price:{
-color:Colors.primary,
-fontSize:RF(22),
-fontFamily:Fonts.bold,
-marginTop:RH(12),
-},
+  watchImage: {
+    width: RW(95),
+    height: RH(130),
+    marginRight: RW(18),
+  },
 
-summary:{
-backgroundColor:"#14264D",
-borderRadius:RS(22),
-padding:RS(20),
-marginBottom:RH(30),
-},
+  info: {
+    flex: 1,
+    justifyContent: "space-between",
+    paddingVertical: RH(4),
+  },
 
-summaryRow:{
-flexDirection:"row",
-justifyContent:"space-between",
-marginBottom:RH(14),
-},
+  brand: {
+    color: Colors.primary,
+    fontSize: RF(10),
+    fontFamily: Fonts.semiBold,
+    letterSpacing: RW(2),
+  },
 
-summaryLabel:{
-color:"#AEBBD6",
-fontSize:RF(15),
-fontFamily:Fonts.regular,
-},
+  name: {
+    color: Colors.white,
+    fontSize: RF(20),
+    fontFamily: Fonts.bold,
+    marginTop: RH(4),
+  },
 
-summaryValue:{
-color:Colors.white,
-fontSize:RF(16),
-fontFamily:Fonts.medium,
-},
+  price: {
+    color: Colors.primary,
+    fontSize: RF(22),
+    fontFamily: Fonts.bold,
+    marginVertical: RH(8),
+  },
 
-divider:{
-height:1,
-backgroundColor:"rgba(255,255,255,0.08)",
-marginVertical:RH(12),
-},
+  quantityRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+  },
 
-checkoutBtn:{
-height:RH(60),
-borderRadius:RS(16),
-backgroundColor:Colors.primary,
-justifyContent:"center",
-alignItems:"center",
-marginTop:RH(22),
-},
+  qtyBtn: {
+    width: RS(34),
+    height: RS(34),
+    borderRadius: RS(17),
+    backgroundColor: Colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
-checkoutText:{
-color:Colors.secondary,
-fontSize:RF(16),
-fontFamily:Fonts.bold,
-letterSpacing:RW(2),
-},
+  qtySymbol: {
+    color: Colors.secondary,
+    fontSize: RF(22),
+    fontFamily: Fonts.bold,
+    marginTop: -2,
+  },
+
+  qty: {
+    color: Colors.white,
+    fontSize: RF(18),
+    fontFamily: Fonts.bold,
+    marginHorizontal: RW(18),
+    minWidth: RW(22),
+    textAlign: "center",
+  },
+
+  /* Summary */
+
+  summary: {
+    paddingTop: RH(18),
+  },
+
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: RH(14),
+  },
+
+  summaryLabel: {
+    color: "#A7B3CC",
+    fontSize: RF(15),
+    fontFamily: Fonts.regular,
+  },
+
+  summaryValue: {
+    color: Colors.white,
+    fontSize: RF(16),
+    fontFamily: Fonts.medium,
+  },
+
+  totalLabel: {
+    color: Colors.white,
+    fontSize: RF(18),
+    fontFamily: Fonts.bold,
+  },
+
+  totalValue: {
+    color: Colors.primary,
+    fontSize: RF(24),
+    fontFamily: Fonts.bold,
+  },
+
+  divider: {
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    marginVertical: RH(14),
+  },
+
+  checkoutBtn: {
+    marginTop: RH(24),
+    height: RH(62),
+    backgroundColor: Colors.primary,
+    borderRadius: RS(18),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  checkoutText: {
+    color: Colors.secondary,
+    fontSize: RF(16),
+    fontFamily: Fonts.bold,
+    letterSpacing: RW(2),
+  },
+
+  emptyImage: {
+    width: RS(120),
+    height: RS(120),
+    resizeMode: "contain",
+    opacity: 0.75,
+    marginBottom: RH(24),
+  },
+
+  shopButton: {
+    marginTop: RH(28),
+    backgroundColor: Colors.primary,
+    paddingHorizontal: RW(34),
+    height: RH(52),
+    borderRadius: RS(16),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  shopButtonText: {
+    color: Colors.secondary,
+    fontSize: RF(15),
+    fontFamily: Fonts.bold,
+    letterSpacing: RW(1.5),
+  },
 });
-

@@ -1,21 +1,16 @@
+import Feather from '@expo/vector-icons/Feather';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import Feather from '@expo/vector-icons/Feather';
-import { ComponentType } from 'react';
+import type { RootStackParamList } from '../navigation/RootNavigation';
 
-
-export type IconType = ComponentType<{
-    name: string;
-    size?: number;
-    color?: string;
-}>;
+export type IconType = any;
 
 export interface DrawerItemType {
     id: number;
     title: string;
     icon: string;
     iconType: IconType;
-    screen: string;
+    screen: keyof RootStackParamList;
 }
 
 

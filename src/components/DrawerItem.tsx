@@ -1,11 +1,10 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
 import React from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { SharedValue } from "react-native-reanimated";
 import { DrawerItemType } from "../data/DrawerList";
 import useTypeSafeNavigation from "../hooks/useTypeSafeNavigation";
-import { RF, RH, RW } from "../utlis/responsive";
 import Colors from "../utlis/colors";
-import { RootStackParamList } from "../navigation/RootNavigation";
-import { SharedValue } from "react-native-reanimated";
+import { RF, RH, RW } from "../utlis/responsive";
 
 type Props = {
     item: DrawerItemType;
@@ -19,7 +18,10 @@ const DrawerItem = ({ item, active }: Props) => {
 
     return (
         <Pressable
-            onPress={() => { navigation.navigate(item.screen as keyof RootStackParamList); active.value = !active.value }}
+            onPress={() => {
+                navigation.navigate(item.screen as never);
+                active.value = !active.value;
+            }}
             style={({ pressed }) => [
                 styles.container,
                 pressed && styles.pressed,

@@ -7,21 +7,39 @@ import {
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from "react-native";
 
-import { useRoute } from "@react-navigation/native";
+import { RouteProp, useRoute } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Fonts from "../constants/fonts";
+import type { RootStackParamList } from "../navigation/RootNavigation";
+import { useAppDispatch } from "../store/hooks";
+import { addToCart } from "../store/slices/cartSlice";
 import Colors from "../utlis/colors";
 import { RF, RH, RS, RW } from "../utlis/responsive";
 
 const HERO_HEIGHT = RH(445);
 export default function ProductDetail({ navigation }: any) {
-    const { product } = useRoute().params;
+    const route = useRoute<RouteProp<RootStackParamList, "ProductDetail">>();
+    const product = route.params.product;
 
     const specsScrollRef = useRef<ScrollView>(null);
     const descriptionScrollRef = useRef<ScrollView>(null);
+
+
+    const dispatch = useAppDispatch();
+
+    const handleAddToCart = () => {
+        console.log(product);
+
+        dispatch(addToCart(product));
+
+
+        
+    };
+
+
 
 
     const scrollUp = () => {
@@ -120,8 +138,10 @@ export default function ProductDetail({ navigation }: any) {
                         </View>
 
                         <View style={styles.bottomRow}>
-                            <TouchableOpacity style={styles.cartButton}>
-                                <Text style={styles.cartText}>ADD TO CART</Text>
+                            <TouchableOpacity
+                                style={styles.cartButton}
+                                onPress={handleAddToCart}
+                            >                                <Text style={styles.cartText}>ADD TO CART</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity style={styles.heartButton}>

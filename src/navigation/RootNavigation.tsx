@@ -1,16 +1,18 @@
-import { useFonts } from "expo-font";
-import { createStackNavigator, TransitionPresets } from '@react-navigation/stack'
-import { useEffect, useState } from "react";
+import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
 import { Asset } from "expo-asset";
+import { useFonts } from "expo-font";
+import { useEffect, useState } from "react";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { GestureHandlerRootView } from 'react-native-gesture-handler'
-import Splash from "../screens/Splash";
+import Cart from "../screens/Cart";
+import Favorites from "../screens/Favorites";
 import Home from "../screens/Home";
+import MyOrders from "../screens/MyOrders";
 import ProductDetail from "../screens/ProductDetail";
 import Profile from "../screens/Profile";
-import MyOrders from "../screens/MyOrders";
-import Favorites from "../screens/Favorites";
-import Cart from "../screens/Cart";
+import Search from "../screens/Search";
+import Splash from "../screens/Splash";
+import type { Product } from "../types/product";
 
 const Stack = createStackNavigator();
 
@@ -18,11 +20,12 @@ const Stack = createStackNavigator();
 export type RootStackParamList = {
     Splash: undefined;
     Home: undefined;
-    ProductDetail: undefined;
+    ProductDetail: { product: Product };
     Profile: undefined;
     MyOrders: undefined;
     Favorites: undefined;
     Cart: undefined;
+    Search: undefined;
 }
 
 
@@ -72,6 +75,7 @@ export default function RootNavigation() {
                             <Stack.Screen name="MyOrders" component={MyOrders} />
                             <Stack.Screen name="Favorites" component={Favorites} />
                             <Stack.Screen name="Cart" component={Cart} />
+                            <Stack.Screen name="Search" component={Search} />
                         </>
                     )}
                 </Stack.Navigator>

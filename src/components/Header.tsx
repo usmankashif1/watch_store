@@ -1,16 +1,16 @@
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
 import React from 'react'
-import { RH, RS, RW } from '../utlis/responsive'
-import Colors from '../utlis/colors'
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { SharedValue } from 'react-native-reanimated'
-import { useNavigation } from 'expo-router'
+import Colors from '../utlis/colors'
+import { RH, RS, RW } from '../utlis/responsive'
 
 type Props = {
     active: SharedValue<boolean>
 }
 
 const Header = ({ active }: Props) => {
-    const navigation = useNavigation()
+    const navigation = useNavigation<any>()
     return (
         <View style={styles.header}>
             <TouchableOpacity onPress={() => { active.value = !active.value }}>
@@ -21,8 +21,12 @@ const Header = ({ active }: Props) => {
             </TouchableOpacity>
 
             <View style={styles.headerRight}>
-                <TouchableOpacity>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate("Search")}
+
+                >
                     <Image
+
                         source={require("../assets/icons/SearchIcon.png")}
                         style={[styles.headerIcon, { width: RS(28), height: RS(28) }]}
                     />
