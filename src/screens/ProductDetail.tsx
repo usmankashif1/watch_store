@@ -101,7 +101,13 @@ export default function ProductDetail({ navigation }: any) {
                         </View>
 
                         <View style={styles.leftDetails}>
-                            <TouchableOpacity onPress={scrollUp}>
+                            <TouchableOpacity
+                                //  style={[styles.IndicatorButtons,
+                                // {
+                                //     marginBottom: RH(10)
+
+                                // }]} 
+                                onPress={scrollUp}>
                                 <Image style={styles.scrollArrow} source={require("../assets/icons/UpArrow.png")} />
                             </TouchableOpacity>
 
@@ -115,8 +121,16 @@ export default function ProductDetail({ navigation }: any) {
                                 ))}
                             </ScrollView>
 
-                            <TouchableOpacity onPress={scrollDown}>
-                                <Image style={[styles.scrollArrow, { marginTop: RH(18) }]} source={require("../assets/icons/DownArrow.png")} />
+                            <TouchableOpacity
+                                //  style={[styles.IndicatorButtons,
+                                // {
+                                //     marginTop: RH(10)
+                                // }
+                                // ]}
+                                onPress={scrollDown}>
+                                <Image style={[styles.scrollArrow,
+                                { marginTop: RH(18) }
+                                ]} source={require("../assets/icons/DownArrow.png")} />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -377,6 +391,13 @@ const styles = StyleSheet.create({
     },
     hero: {
         height: HERO_HEIGHT,
+    },
+    IndicatorButtons: {
+        backgroundColor: Colors.primary,
+        borderRadius: RS(50),
+        alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: RH(5),
     }
 
 });

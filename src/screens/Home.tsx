@@ -19,6 +19,8 @@ import Colors from "../utlis/colors";
 import { RF, RH, RS, RW } from "../utlis/responsive";
 import Overlay from "../components/Overlay";
 import Drawer from "../components/Drawer";
+import FeatureProductCarousel from "../components/FeatureProductCarousel";
+import { featureProducts } from "../data/featureProducts";
 
 
 export default function Home({ navigation }: any) {
@@ -73,7 +75,7 @@ export default function Home({ navigation }: any) {
 
                         <SectionHeader smallTitle="FEATURED" title="PRODUCTS" />
 
-                        <View style={styles.featureCard}>
+                        {/* <View style={styles.featureCard}>
                             <View style={styles.featureTextBox}>
                                 <Text style={styles.arrival}>New Arrival</Text>
                                 <Text style={styles.featureTitle}>BREMONT</Text>
@@ -96,7 +98,26 @@ export default function Home({ navigation }: any) {
                                 style={styles.featureWatch}
                                 resizeMode="contain"
                             />
-                        </View>
+                        </View> */}
+
+
+
+
+                        <FeatureProductCarousel
+                            products={featureProducts}
+                            onBuyPress={(item) => {
+                                navigation.navigate("ProductDetail", {
+                                    product: item.product,
+                                });
+                            }}
+                        />
+
+
+
+
+
+
+
 
                         <SectionHeader smallTitle="TRENDING" title="PRODUCTS" />
 
