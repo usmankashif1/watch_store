@@ -67,6 +67,7 @@ export default function RootNavigation() {
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
+        
             <SafeAreaProvider>
                 <Stack.Navigator screenOptions={{ headerShown: false, ...TransitionPresets.SlideFromRightIOS, detachPreviousScreen: false }}>
                     {showSplash ? (
