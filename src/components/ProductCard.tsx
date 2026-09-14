@@ -1,21 +1,10 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Colors from "../utlis/colors";
 import Fonts from "../constants/fonts";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { toggleFavorite } from "../store/slices/favoritesSlice";
+import type { Product } from "../types/product";
+import Colors from "../utlis/colors";
 import { RF, RH, RS, RW } from "../utlis/responsive";
-
-type Product = {
-  id: string;
-  brand: string;
-  name: string;
-  image: any;
-  liked?: boolean;
-  price: string;
-  strap: string;
-  color: string;
-  warranty: string;
-  description: string;
-  details: string[];
-};
 
 type Props = {
   product: Product;
@@ -23,13 +12,23 @@ type Props = {
 };
 
 export default function ProductCard({ product, onPress }: Props) {
+  const dispatch = useAppDispatch();
+  const favoriteIds = useAppSelector((state) => state.favorites.items.map((item) => item.id));
+  const isFavorite = favoriteIds.includes(product.id);
+
   return (
     <TouchableOpacity onPress={onPress} style={styles.productWrapper}>
       <View style={styles.productCard}>
-        <TouchableOpacity style={styles.heartBox}>
+        <TouchableOpacity
+          style={styles.heartBox}
+          onPress={(event) => {
+            event.stopPropagation?.();
+            dispatch(toggleFavorite(product));
+          }}
+        >
           <Image
             source={
-              product.liked
+              isFavorite
                 ? require("../assets/icons/HeartFill.png")
                 : require("../assets/icons/Heart.png")
             }

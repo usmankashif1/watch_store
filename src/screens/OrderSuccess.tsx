@@ -1,29 +1,56 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
-  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import Colors from "../utlis/colors";
+import LottieView from 'lottie-react-native';
 import Fonts from "../constants/fonts";
+import Colors from "../utlis/colors";
 import { RF, RH, RS, RW } from "../utlis/responsive";
+
 
 export default function OrderSuccess({ navigation }: any) {
   const orderId = "#" + Math.floor(100000 + Math.random() * 900000);
+
+  const goHome = () => {
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "Home" }],
+    });
+  };
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("beforeRemove", (event: any) => {
+      if (event.data?.action?.type === "GO_BACK") {
+        event.preventDefault();
+        goHome();
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
 
         <View style={styles.iconContainer}>
-          <Image
-            source={require("../assets/icons/Success.png")}
+
+          <LottieView
+            // ref={animationRef}
+            source={require('../animations/SuccessfullyAnimation.json')}
+            loop={false}
+            autoPlay={true}
+            resizeMode="contain"
             style={styles.successIcon}
           />
+
+
+
         </View>
 
         <Text style={styles.title}>
@@ -62,7 +89,7 @@ export default function OrderSuccess({ navigation }: any) {
 
         <TouchableOpacity
           style={styles.primaryButton}
-          onPress={() => navigation.navigate("Home")}
+          onPress={goHome}
         >
           <Text style={styles.primaryText}>
             CONTINUE SHOPPING
@@ -112,24 +139,19 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: RW(25),
   },
 
   iconContainer: {
     alignSelf: "center",
-    width: RS(120),
-    height: RS(120),
-    borderRadius: RS(60),
-    backgroundColor: "#17305F",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: RH(30),
   },
 
   successIcon: {
-    width: RS(70),
-    height: RS(70),
-    resizeMode: "contain",
+    width: 160,
+    height: 160,
   },
 
   title: {
@@ -138,6 +160,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bold,
     textAlign: "center",
     letterSpacing: RW(2),
+    marginBottom: RH(8),
   },
 
   subtitle: {
@@ -146,15 +169,16 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
     textAlign: "center",
     lineHeight: RH(24),
-    marginTop: RH(14),
-    marginBottom: RH(35),
+    marginTop: RH(5),
+    marginBottom: RH(20),
   },
 
   card: {
     backgroundColor: "#14264D",
     borderRadius: RS(22),
     padding: RS(20),
-    marginBottom: RH(40),
+    marginBottom: RH(25),
+    width: "100%",
   },
 
   infoRow: {
@@ -177,6 +201,7 @@ const styles = StyleSheet.create({
 
   primaryButton: {
     height: RH(60),
+    width: "100%",
     backgroundColor: Colors.primary,
     borderRadius: RS(18),
     justifyContent: "center",
@@ -193,6 +218,7 @@ const styles = StyleSheet.create({
 
   secondaryButton: {
     height: RH(60),
+    width: "100%",
     borderRadius: RS(18),
     borderWidth: 1,
     borderColor: Colors.primary,

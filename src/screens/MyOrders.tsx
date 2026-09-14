@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
     FlatList,
     Image,
@@ -8,107 +8,92 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useSelector } from "react-redux";
 
-import Colors from "../utlis/colors";
 import Fonts from "../constants/fonts";
+import type { RootState } from "../store";
+import Colors from "../utlis/colors";
 import { RF, RH, RS, RW } from "../utlis/responsive";
 
-const orders = [
-    {
-        id: "ORD-1001",
-        watch: "Thommen Watches",
-        brand: "REVUE THOMMEN",
-        price: "$250",
-        status: "Delivered",
-        date: "12 Jul 2026",
-        image: require("../assets/images/watches/CAT_Watches.png"),
-    },
-    {
-        id: "ORD-1002",
-        watch: "Bremont Classic",
-        brand: "BREMONT",
-        price: "$480",
-        status: "Shipped",
-        date: "18 Jul 2026",
-        image: require("../assets/images/watches/Bremont.png"),
-    },
-    {
-        id: "ORD-1003",
-        watch: "Tommy Hilfiger",
-        brand: "TOMMY HILFIGER",
-        price: "$320",
-        status: "Processing",
-        date: "20 Jul 2026",
-        image: require("../assets/images/watches/Tommy_Hilfiger.png"),
-    },
-];
-
 export default function MyOrders({ navigation }: any) {
-    const renderItem = ({ item }: any) => (
-        <TouchableOpacity activeOpacity={0.9} style={styles.card}>
-            <Image
-                source={item.image}
-                resizeMode="contain"
-                style={styles.image}
-            />
+    const orders = useSelector((state: RootState) => state.orders.items);
 
-            <View style={styles.info}>
+    const goHome = () => {
+        navigation.reset({
+            index: 0,
+            routes: [{ name: "Home" }],
+        });
+    };
 
-                <View style={styles.topRow}>
-                    <View style={{ flex: 1 }}>
-                        <Text style={styles.brand}>{item.brand}</Text>
+    useEffect(() => {
+        const unsubscribe = navigation.addListener("beforeRemove", (event: any) => {
+            if (event.data?.action?.type === "GO_BACK") {
+                event.preventDefault();
+                goHome();
+            }
+        });
 
-                        <Text numberOfLines={1} style={styles.watch}>
-                            {item.watch}
-                        </Text>
+        return unsubscribe;
+    }, [navigation]);
+
+    const renderItem = ({ item }: any) => {
+        const firstItem = item.items?.[0];
+        const status = item.status || "Processing";
+        const date = new Date(item.createdAt).toLocaleDateString(undefined, {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        });
+
+        return (
+            <TouchableOpacity activeOpacity={0.9} style={styles.card}>
+                <Image
+                    source={firstItem?.image || require("../assets/images/watches/Bremont.png")}
+                    resizeMode="contain"
+                    style={styles.image}
+                />
+
+                <View style={styles.info}>
+                    <View style={styles.topRow}>
+                        <View style={{ flex: 1 }}>
+                            <Text style={styles.brand}>{firstItem?.brand || "WATCH STORE"}</Text>
+                            <Text numberOfLines={1} style={styles.watch}>
+                                {firstItem?.name || "Luxury Watch"}
+                            </Text>
+                        </View>
+
+                        <View
+                            style={[
+                                styles.status,
+                                status === "Delivered"
+                                    ? styles.green
+                                    : status === "Shipped"
+                                        ? styles.orange
+                                        : styles.gray,
+                            ]}
+                        >
+                            <Text style={styles.statusText}>{status}</Text>
+                        </View>
                     </View>
 
-                    <View
-                        style={[
-                            styles.status,
-                            item.status === "Delivered"
-                                ? styles.green
-                                : item.status === "Shipped"
-                                    ? styles.orange
-                                    : styles.gray,
-                        ]}
-                    >
-                        <Text style={styles.statusText}>
-                            {item.status}
-                        </Text>
+                    <Text style={styles.orderId}>#{item.id}</Text>
+                    <Text style={styles.date}>Ordered on {date}</Text>
+
+                    <View style={styles.bottomRow}>
+                        <Text style={styles.price}>${Number(item.total || 0).toFixed(2)}</Text>
+                        <TouchableOpacity style={styles.button}>
+                            <Text style={styles.buttonText}>Track Order →</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
-
-                <Text style={styles.orderId}>
-                    #{item.id}
-                </Text>
-
-                <Text style={styles.date}>
-                    Ordered on {item.date}
-                </Text>
-
-                <View style={styles.bottomRow}>
-                    <Text style={styles.price}>
-                        {item.price}
-                    </Text>
-
-                    <TouchableOpacity style={styles.button}>
-                        <Text style={styles.buttonText}>
-                            Track Order →
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-
-            </View>
-        </TouchableOpacity>
-    );
-
-
+            </TouchableOpacity>
+        );
+    };
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
+                <TouchableOpacity onPress={goHome}>
                     <Image
                         source={require("../assets/icons/BackArrow.png")}
                         style={styles.back}
@@ -130,6 +115,11 @@ export default function MyOrders({ navigation }: any) {
                 contentContainerStyle={{
                     paddingBottom: RH(30),
                 }}
+                ListEmptyComponent={
+                    <View style={styles.emptyRow}>
+                        <Text style={styles.emptyTitle}>No orders placed yet</Text>
+                    </View>
+                }
             />
         </SafeAreaView>
     );
@@ -273,5 +263,16 @@ const styles = StyleSheet.create({
         fontSize: RF(11),
         fontFamily: Fonts.bold,
         letterSpacing: RW(1),
+    },
+
+    emptyRow: {
+        paddingTop: RH(80),
+        alignItems: "center",
+    },
+
+    emptyTitle: {
+        color: Colors.white,
+        fontSize: RF(16),
+        fontFamily: Fonts.regular,
     },
 });

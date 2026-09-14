@@ -1,3 +1,4 @@
+import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
 import {
     FlatList,
@@ -9,12 +10,11 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
 
 import ProductCard from "../components/ProductCard";
+import Fonts from "../constants/fonts";
 import { products } from "../data/products";
 import Colors from "../utlis/colors";
-import Fonts from "../constants/fonts";
 import { RF, RH, RS, RW } from "../utlis/responsive";
 
 const Search = () => {
@@ -53,7 +53,6 @@ const Search = () => {
 
                 <Text style={styles.title}>SEARCH WATCHES</Text>
 
-                {/* Empty view to keep the title centered */}
                 <View style={styles.placeholder} />
             </View>
 
@@ -84,7 +83,7 @@ const Search = () => {
                     renderItem={({ item }) => (
                         <ProductCard
                             product={item}
-                            onPress={navigation}
+                            onPress={() => navigation.navigate("ProductDetail", { product: item })}
                         />
                     )}
                 />

@@ -5,9 +5,11 @@ import { useEffect, useState } from "react";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Cart from "../screens/Cart";
+import Checkout from '../screens/Checkout';
 import Favorites from "../screens/Favorites";
 import Home from "../screens/Home";
 import MyOrders from "../screens/MyOrders";
+import OrderSuccess from '../screens/OrderSuccess';
 import ProductDetail from "../screens/ProductDetail";
 import Profile from "../screens/Profile";
 import Search from "../screens/Search";
@@ -26,6 +28,8 @@ export type RootStackParamList = {
     Favorites: undefined;
     Cart: undefined;
     Search: undefined;
+    Checkout: undefined;
+    OrderSuccess: undefined;
 }
 
 
@@ -76,6 +80,8 @@ export default function RootNavigation() {
                             <Stack.Screen name="Favorites" component={Favorites} />
                             <Stack.Screen name="Cart" component={Cart} />
                             <Stack.Screen name="Search" component={Search} />
+                            <Stack.Screen name="Checkout" component={Checkout} />
+                            <Stack.Screen name="OrderSuccess" component={OrderSuccess} />
                         </>
                     )}
                 </Stack.Navigator>

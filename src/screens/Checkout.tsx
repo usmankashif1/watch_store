@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import {
   Image,
+  ImageBackground,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,426 +11,462 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
-
-import Colors from "../utlis/colors";
 import Fonts from "../constants/fonts";
-import { RF, RH, RS, RW } from "../utlis/responsive";
-
+import type { RootState } from "../store";
 import { useAppDispatch } from "../store/hooks";
 import { clearCart } from "../store/slices/cartSlice";
+import { addOrder } from "../store/slices/ordersSlice";
+import Colors from "../utlis/colors";
+import { RF, RH, RS, RW } from "../utlis/responsive";
 
 export default function Checkout({ navigation }: any) {
-  const dispatch = useAppDispatch();
+    const dispatch = useAppDispatch();
+    const cartItems = useSelector((state: RootState) => state.cart.items);
+    const subtotal = useMemo(() => cartItems.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0), [cartItems]);
+    const tax = subtotal * 0.08;
+    const shipping = subtotal > 0 ? 0 : 0;
+    const total = subtotal + tax + shipping;
 
-  const cartItems = useSelector((state: any) => state.cart.items);
+    const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("cash");
+    const [customer, setCustomer] = useState({
+        fullName: "",
+        email: "",
+        phone: "",
+        address: "",
+        city: "",
+        postalCode: "",
+        country: "",
+    });
+    const [cardNumber, setCardNumber] = useState("");
+    const [expiryDate, setExpiryDate] = useState("");
+    const [cvv, setCvv] = useState("");
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const [name, setName] = useState("Muhammad Usman");
-  const [phone, setPhone] = useState("+92 300 1234567");
-  const [city, setCity] = useState("Islamabad");
-  const [address, setAddress] = useState("");
-  const [postalCode, setPostalCode] = useState("");
+    const validate = () => {
+        const nextErrors: Record<string, string> = {};
 
-  const subtotal = useMemo(() => {
-    return cartItems.reduce(
-      (sum: number, item: any) => sum + item.price * item.quantity,
-      0
-    );
-  }, [cartItems]);
+        if (!customer.fullName.trim()) nextErrors.fullName = "Full name is required";
+        if (!customer.email.trim()) nextErrors.email = "Email is required";
+        else if (!/\S+@\S+\.\S+/.test(customer.email)) nextErrors.email = "Enter a valid email";
+        if (!customer.phone.trim()) nextErrors.phone = "Phone number is required";
+        if (!customer.address.trim()) nextErrors.address = "Address is required";
+        if (!customer.city.trim()) nextErrors.city = "City is required";
+        if (!customer.postalCode.trim()) nextErrors.postalCode = "Postal code is required";
+        if (!customer.country.trim()) nextErrors.country = "Country is required";
 
-  const shipping = 0;
-  const tax = subtotal * 0.05;
-  const total = subtotal + shipping + tax;
+        if (paymentMethod === "card") {
+            if (!cardNumber.trim()) nextErrors.cardNumber = "Card number is required";
+            if (!expiryDate.trim()) nextErrors.expiryDate = "Expiry date is required";
+            if (!cvv.trim()) nextErrors.cvv = "CVV is required";
+        }
 
-  const placeOrder = () => {
-    dispatch(clearCart());
+        setErrors(nextErrors);
+        return Object.keys(nextErrors).length === 0;
+    };
 
-    navigation.replace("OrderSuccess");
-  };
+    const handlePlaceOrder = () => {
+        if (!validate()) return;
+        if (!cartItems.length) return;
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.content}
-      >
-        {/* Header */}
+        const newOrder = {
+            id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+            customer,
+            items: cartItems,
+            total,
+            tax,
+            shipping,
+            paymentMethod,
+            createdAt: new Date().toISOString(),
+            status: "Processing",
+        };
 
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Image
-              source={require("../assets/icons/BackArrow.png")}
-              style={styles.back}
-            />
-          </TouchableOpacity>
+        dispatch(addOrder(newOrder));
+        dispatch(clearCart());
+        navigation.navigate("OrderSuccess");
+    };
 
-          <View>
-            <Text style={styles.smallTitle}>
-              COMPLETE YOUR
-            </Text>
-
-            <Text style={styles.title}>
-              CHECKOUT
-            </Text>
-          </View>
-
-          <View style={{ width: RS(30) }} />
-        </View>
-
-        {/* Customer */}
-
-        <Text style={styles.sectionTitle}>
-          CUSTOMER INFORMATION
-        </Text>
-
-        <View style={styles.inputCard}>
-          <Text style={styles.label}>
-            Full Name
-          </Text>
-
-          <TextInput
-            value={name}
-            onChangeText={setName}
-            placeholder="Enter name"
-            placeholderTextColor="#8091B2"
-            style={styles.input}
-          />
-
-          <Text style={styles.label}>
-            Phone Number
-          </Text>
-
-          <TextInput
-            value={phone}
-            onChangeText={setPhone}
-            placeholder="Phone"
-            keyboardType="phone-pad"
-            placeholderTextColor="#8091B2"
-            style={styles.input}
-          />
-        </View>
-
-        {/* Address */}
-
-        <Text style={styles.sectionTitle}>
-          DELIVERY ADDRESS
-        </Text>
-
-        <View style={styles.inputCard}>
-          <Text style={styles.label}>
-            City
-          </Text>
-
-          <TextInput
-            value={city}
-            onChangeText={setCity}
-            style={styles.input}
-            placeholder="City"
-            placeholderTextColor="#8091B2"
-          />
-
-          <Text style={styles.label}>
-            Street Address
-          </Text>
-
-          <TextInput
-            value={address}
-            onChangeText={setAddress}
-            style={styles.input}
-            placeholder="House / Street"
-            placeholderTextColor="#8091B2"
-          />
-
-          <Text style={styles.label}>
-            Postal Code
-          </Text>
-
-          <TextInput
-            value={postalCode}
-            onChangeText={setPostalCode}
-            style={styles.input}
-            placeholder="44000"
-            keyboardType="number-pad"
-            placeholderTextColor="#8091B2"
-          />
-        </View>
-
-        {/* Payment */}
-
-        <Text style={styles.sectionTitle}>
-          PAYMENT METHOD
-        </Text>
-
-        <View style={styles.paymentCard}>
-          <Image
-            source={require("../assets/icons/Cash.png")}
-            style={styles.paymentIcon}
-          />
-
-          <View style={{ flex: 1 }}>
-            <Text style={styles.paymentTitle}>
-              Cash On Delivery
-            </Text>
-
-            <Text style={styles.paymentSubtitle}>
-              Pay after receiving your order.
-            </Text>
-          </View>
-
-          <Image
-            source={require("../assets/icons/CheckCircle.png")}
-            style={styles.checkIcon}
-          />
-        </View>
-
-        {/* Summary */}
-
-        <Text style={styles.sectionTitle}>
-          ORDER SUMMARY
-        </Text>
-
-        <View style={styles.summaryCard}>
-          <SummaryRow
-            label="Subtotal"
-            value={`$${subtotal.toFixed(2)}`}
-          />
-
-          <SummaryRow
-            label="Shipping"
-            value="Free"
-          />
-
-          <SummaryRow
-            label="Tax"
-            value={`$${tax.toFixed(2)}`}
-          />
-
-          <View style={styles.divider} />
-
-          <SummaryRow
-            label="Total"
-            value={`$${total.toFixed(2)}`}
-            bold
-          />
-        </View>
-
-        <TouchableOpacity
-          style={styles.orderButton}
-          onPress={placeOrder}
+    return (
+        <ImageBackground
+            source={require("../assets/icons/BackgroundTwo.png")}
+            style={styles.screen}
         >
-          <Text style={styles.orderText}>
-            PLACE ORDER
-          </Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </SafeAreaView>
-  );
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <Image
+                            source={require("../assets/icons/BackArrow.png")}
+                            style={styles.backIcon}
+                        />
+                    </TouchableOpacity>
+
+                    <Text style={styles.title}>CHECKOUT</Text>
+
+                    <View style={styles.headerSpace} />
+                </View>
+
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={styles.content}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    <Text style={styles.sectionTitle}>CONTACT INFO</Text>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>FULL NAME</Text>
+                        <TextInput
+                            placeholder="Enter your full name"
+                            placeholderTextColor="#7F8DA8"
+                            style={[styles.input, errors.fullName && styles.inputError]}
+                            value={customer.fullName}
+                            onChangeText={(value) => setCustomer({ ...customer, fullName: value })}
+                        />
+                        {errors.fullName && <Text style={styles.errorText}>{errors.fullName}</Text>}
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>EMAIL</Text>
+                        <TextInput
+                            placeholder="Enter your email"
+                            placeholderTextColor="#7F8DA8"
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                            style={[styles.input, errors.email && styles.inputError]}
+                            value={customer.email}
+                            onChangeText={(value) => setCustomer({ ...customer, email: value })}
+                        />
+                        {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>PHONE NUMBER</Text>
+                        <TextInput
+                            placeholder="Enter your phone number"
+                            placeholderTextColor="#7F8DA8"
+                            keyboardType="phone-pad"
+                            style={[styles.input, errors.phone && styles.inputError]}
+                            value={customer.phone}
+                            onChangeText={(value) => setCustomer({ ...customer, phone: value })}
+                        />
+                        {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
+                    </View>
+
+                    <Text style={styles.sectionTitle}>SHIPPING ADDRESS</Text>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>ADDRESS</Text>
+                        <TextInput
+                            placeholder="House / Street / Area"
+                            placeholderTextColor="#7F8DA8"
+                            style={[styles.input, errors.address && styles.inputError]}
+                            value={customer.address}
+                            onChangeText={(value) => setCustomer({ ...customer, address: value })}
+                        />
+                        {errors.address && <Text style={styles.errorText}>{errors.address}</Text>}
+                    </View>
+
+                    <View style={styles.row}>
+                        <View style={styles.halfInput}>
+                            <Text style={styles.label}>CITY</Text>
+                            <TextInput
+                                placeholder="City"
+                                placeholderTextColor="#7F8DA8"
+                                style={[styles.input, errors.city && styles.inputError]}
+                                value={customer.city}
+                                onChangeText={(value) => setCustomer({ ...customer, city: value })}
+                            />
+                            {errors.city && <Text style={styles.errorText}>{errors.city}</Text>}
+                        </View>
+
+                        <View style={styles.halfInput}>
+                            <Text style={styles.label}>POSTAL CODE</Text>
+                            <TextInput
+                                placeholder="Postal code"
+                                placeholderTextColor="#7F8DA8"
+                                keyboardType="number-pad"
+                                style={[styles.input, errors.postalCode && styles.inputError]}
+                                value={customer.postalCode}
+                                onChangeText={(value) => setCustomer({ ...customer, postalCode: value })}
+                            />
+                            {errors.postalCode && <Text style={styles.errorText}>{errors.postalCode}</Text>}
+                        </View>
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>COUNTRY</Text>
+                        <TextInput
+                            placeholder="Country"
+                            placeholderTextColor="#7F8DA8"
+                            style={[styles.input, errors.country && styles.inputError]}
+                            value={customer.country}
+                            onChangeText={(value) => setCustomer({ ...customer, country: value })}
+                        />
+                        {errors.country && <Text style={styles.errorText}>{errors.country}</Text>}
+                    </View>
+
+                    <Text style={styles.sectionTitle}>PAYMENT METHOD</Text>
+
+                    <TouchableOpacity
+                        style={[
+                            styles.paymentCard,
+                            paymentMethod === "cash" && styles.selectedPayment,
+                        ]}
+                        onPress={() => setPaymentMethod("cash")}
+                    >
+                        <View style={styles.radio}>
+                            {paymentMethod === "cash" && <View style={styles.radioInner} />}
+                        </View>
+
+                        <View style={styles.paymentInfo}>
+                            <Text style={styles.paymentTitle}>CASH ON DELIVERY</Text>
+                            <Text style={styles.paymentDescription}>Pay when your order arrives</Text>
+                        </View>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[
+                            styles.paymentCard,
+                            paymentMethod === "card" && styles.selectedPayment,
+                        ]}
+                        onPress={() => setPaymentMethod("card")}
+                    >
+                        <View style={styles.radio}>
+                            {paymentMethod === "card" && <View style={styles.radioInner} />}
+                        </View>
+
+                        <View style={styles.paymentInfo}>
+                            <Text style={styles.paymentTitle}>PAY WITH CARD</Text>
+                            <Text style={styles.paymentDescription}>Pay securely using your debit or credit card</Text>
+                        </View>
+                    </TouchableOpacity>
+
+                    {paymentMethod === "card" && (
+                        <View style={styles.cardSection}>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>CARD NUMBER</Text>
+                                <TextInput
+                                    placeholder="0000 0000 0000 0000"
+                                    placeholderTextColor="#7F8DA8"
+                                    keyboardType="number-pad"
+                                    maxLength={19}
+                                    style={[styles.input, errors.cardNumber && styles.inputError]}
+                                    value={cardNumber}
+                                    onChangeText={setCardNumber}
+                                />
+                                {errors.cardNumber && <Text style={styles.errorText}>{errors.cardNumber}</Text>}
+                            </View>
+
+                            <View style={styles.row}>
+                                <View style={styles.halfInput}>
+                                    <Text style={styles.label}>EXPIRY DATE</Text>
+                                    <TextInput
+                                        placeholder="MM / YY"
+                                        placeholderTextColor="#7F8DA8"
+                                        style={[styles.input, errors.expiryDate && styles.inputError]}
+                                        value={expiryDate}
+                                        onChangeText={setExpiryDate}
+                                    />
+                                    {errors.expiryDate && <Text style={styles.errorText}>{errors.expiryDate}</Text>}
+                                </View>
+
+                                <View style={styles.halfInput}>
+                                    <Text style={styles.label}>CVV</Text>
+                                    <TextInput
+                                        placeholder="CVV"
+                                        placeholderTextColor="#7F8DA8"
+                                        keyboardType="number-pad"
+                                        maxLength={4}
+                                        secureTextEntry
+                                        style={[styles.input, errors.cvv && styles.inputError]}
+                                        value={cvv}
+                                        onChangeText={setCvv}
+                                    />
+                                    {errors.cvv && <Text style={styles.errorText}>{errors.cvv}</Text>}
+                                </View>
+                            </View>
+                        </View>
+                    )}
+
+                    <TouchableOpacity style={styles.placeOrderButton} onPress={handlePlaceOrder}>
+                        <Text style={styles.placeOrderText}>PLACE ORDER</Text>
+                    </TouchableOpacity>
+
+                    <Text style={styles.secureText}>Your information is safe and secure</Text>
+                </ScrollView>
+            </SafeAreaView>
+        </ImageBackground>
+    );
 }
-
-function SummaryRow({
-  label,
-  value,
-  bold,
-}: {
-  label: string;
-  value: string;
-  bold?: boolean;
-}) {
-  return (
-    <View style={styles.summaryRow}>
-      <Text
-        style={[
-          styles.summaryLabel,
-          bold && styles.totalLabel,
-        ]}
-      >
-        {label}
-      </Text>
-
-      <Text
-        style={[
-          styles.summaryValue,
-          bold && styles.totalValue,
-        ]}
-      >
-        {value}
-      </Text>
-    </View>
-  );
-}
-
-
-
-
-
-
-
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.secondary,
-  },
+    screen: {
+        flex: 1,
+        backgroundColor: Colors.secondary,
+    },
 
-  content: {
-    paddingHorizontal: RW(20),
-    paddingBottom: RH(40),
-  },
+    safeArea: {
+        flex: 1,
+        paddingHorizontal: RW(20),
+    },
 
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: RH(30),
-  },
+    header: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: RH(22),
+    },
 
-  back: {
-    width: RS(30),
-    height: RS(30),
-    resizeMode: "contain",
-  },
+    backIcon: {
+        width: RS(30),
+        height: RS(30),
+        resizeMode: "contain",
+    },
 
-  smallTitle: {
-    color: Colors.primary,
-    fontSize: RF(10),
-    fontFamily: Fonts.semiBold,
-    letterSpacing: RW(3),
-    textAlign: "center",
-  },
+    title: {
+        color: Colors.white,
+        fontSize: RF(24),
+        fontFamily: Fonts.bold,
+        letterSpacing: RW(3),
+    },
 
-  title: {
-    color: Colors.white,
-    fontSize: RF(24),
-    fontFamily: Fonts.bold,
-    letterSpacing: RW(2),
-    marginTop: RH(2),
-  },
+    headerSpace: {
+        width: RS(30),
+    },
 
-  sectionTitle: {
-    color: Colors.primary,
-    fontSize: RF(12),
-    fontFamily: Fonts.bold,
-    letterSpacing: RW(3),
-    marginBottom: RH(12),
-    marginTop: RH(18),
-  },
+    content: {
+        paddingBottom: RH(40),
+    },
 
-  inputCard: {
-    backgroundColor: "#14264D",
-    borderRadius: RS(22),
-    padding: RS(18),
-  },
+    sectionTitle: {
+        color: Colors.primary,
+        fontSize: RF(18),
+        fontFamily: Fonts.semiBold,
+        letterSpacing: RW(2.5),
+        marginTop: RH(8),
+        marginBottom: RH(16),
+    },
 
-  label: {
-    color: "#A7B3CC",
-    fontSize: RF(13),
-    fontFamily: Fonts.medium,
-    marginBottom: RH(8),
-  },
+    inputGroup: {
+        marginBottom: RH(18),
+    },
 
-  input: {
-    height: RH(54),
-    backgroundColor: "#1C325F",
-    borderRadius: RS(14),
-    color: Colors.white,
-    fontSize: RF(15),
-    fontFamily: Fonts.regular,
-    paddingHorizontal: RW(16),
-    marginBottom: RH(16),
-  },
+    label: {
+        color: Colors.white,
+        fontSize: RF(14),
+        fontFamily: Fonts.semiBold,
+        letterSpacing: RW(2),
+        marginBottom: RH(7),
+    },
 
-  paymentCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#14264D",
-    borderRadius: RS(22),
-    padding: RS(18),
-  },
+    input: {
+        height: RH(52),
+        backgroundColor: "#14264D",
+        borderRadius: RS(13),
+        paddingHorizontal: RW(15),
+        color: Colors.white,
+        fontSize: RF(14),
+        fontFamily: Fonts.regular,
+        borderWidth: 1,
+        borderColor: "rgba(255,255,255,0.05)",
+    },
 
-  paymentIcon: {
-    width: RS(48),
-    height: RS(48),
-    resizeMode: "contain",
-    marginRight: RW(16),
-  },
+    row: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        gap: RW(12),
+        marginBottom: RH(2),
+    },
 
-  paymentTitle: {
-    color: Colors.white,
-    fontSize: RF(17),
-    fontFamily: Fonts.bold,
-  },
+    halfInput: {
+        flex: 1,
+    },
 
-  paymentSubtitle: {
-    color: "#A7B3CC",
-    fontSize: RF(13),
-    fontFamily: Fonts.regular,
-    marginTop: RH(4),
-  },
+    paymentCard: {
+        minHeight: RH(72),
+        backgroundColor: "#14264D",
+        borderRadius: RS(16),
+        paddingHorizontal: RW(15),
+        paddingVertical: RH(13),
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: RH(12),
+        borderWidth: 1,
+        borderColor: "transparent",
+    },
 
-  checkIcon: {
-    width: RS(24),
-    height: RS(24),
-    tintColor: Colors.primary,
-    resizeMode: "contain",
-  },
+    selectedPayment: {
+        borderColor: Colors.primary,
+    },
 
-  summaryCard: {
-    backgroundColor: "#14264D",
-    borderRadius: RS(22),
-    padding: RS(20),
-    marginTop: RH(5),
-  },
+    radio: {
+        width: RS(22),
+        height: RS(22),
+        borderRadius: RS(11),
+        borderWidth: 2,
+        borderColor: Colors.primary,
+        alignItems: "center",
+        justifyContent: "center",
+    },
 
-  summaryRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: RH(15),
-  },
+    radioInner: {
+        width: RS(11),
+        height: RS(11),
+        borderRadius: RS(6),
+        backgroundColor: Colors.primary,
+    },
 
-  summaryLabel: {
-    color: "#A7B3CC",
-    fontSize: RF(15),
-    fontFamily: Fonts.regular,
-  },
+    paymentInfo: {
+        flex: 1,
+        marginLeft: RW(13),
+    },
 
-  summaryValue: {
-    color: Colors.white,
-    fontSize: RF(16),
-    fontFamily: Fonts.medium,
-  },
+    paymentTitle: {
+        color: Colors.white,
+        fontSize: RF(13),
+        fontFamily: Fonts.semiBold,
+        letterSpacing: RW(1),
+        marginBottom: RH(4),
+    },
 
-  totalLabel: {
-    color: Colors.white,
-    fontSize: RF(18),
-    fontFamily: Fonts.bold,
-  },
+    paymentDescription: {
+        color: "#8E9DB9",
+        fontSize: RF(11),
+        fontFamily: Fonts.regular,
+    },
 
-  totalValue: {
-    color: Colors.primary,
-    fontSize: RF(24),
-    fontFamily: Fonts.bold,
-  },
+    cardSection: {
+        marginTop: RH(5),
+    },
 
-  divider: {
-    height: 1,
-    backgroundColor: "rgba(255,255,255,0.08)",
-    marginVertical: RH(12),
-  },
+    placeOrderButton: {
+        height: RH(60),
+        backgroundColor: Colors.primary,
+        borderRadius: RS(16),
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: RH(18),
+    },
 
-  orderButton: {
-    height: RH(62),
-    borderRadius: RS(18),
-    backgroundColor: Colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: RH(30),
-    marginBottom: RH(40),
-  },
+    placeOrderText: {
+        color: Colors.secondary,
+        fontSize: RF(17),
+        fontFamily: Fonts.bold,
+        letterSpacing: RW(2.5),
+    },
 
-  orderText: {
-    color: Colors.secondary,
-    fontSize: RF(17),
-    fontFamily: Fonts.bold,
-    letterSpacing: RW(2),
-  },
+    secureText: {
+        color: "#7F8DA8",
+        fontSize: RF(14),
+        fontFamily: Fonts.regular,
+        textAlign: "center",
+        marginTop: RH(12),
+    },
+    inputError: {
+        borderColor: "#FF6B6B",
+    },
+    errorText: {
+        color: "#FFB4B4",
+        fontSize: RF(14),
+        fontFamily: Fonts.regular,
+        marginTop: RH(4),
+    },
 });

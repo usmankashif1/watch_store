@@ -223,7 +223,7 @@ export default function Cart({ navigation }: any) {
                 bold
               />
 
-              <TouchableOpacity style={styles.checkoutBtn}>
+              <TouchableOpacity style={styles.checkoutBtn} onPress={() => navigation.navigate("Checkout")}>
                 <Text style={styles.checkoutText}>
                   PROCEED TO CHECKOUT
                 </Text>

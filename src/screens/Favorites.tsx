@@ -9,146 +9,63 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import Colors from "../utlis/colors";
 import Fonts from "../constants/fonts";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { removeFavorite } from "../store/slices/favoritesSlice";
+import Colors from "../utlis/colors";
 import { RF, RH, RS, RW } from "../utlis/responsive";
 
-const favoriteWatches = [
-  {
-    id: "1",
-    brand: "REVUE THOMMEN",
-    name: "Heritage Automatic",
-    price: "$520",
-    rating: "★★★★★",
-    stock: "In Stock",
-    image: require("../assets/images/watches/Thommen_Watches.png"),
-    liked: true,
-  },
-  {
-    id: "2",
-    brand: "BREMONT",
-    name: "MB Savanna",
-    price: "$690",
-    rating: "★★★★☆",
-    stock: "Limited Edition",
-    image: require("../assets/images/watches/Bremont.png"),
-    liked: true,
-  },
-  {
-    id: "3",
-    brand: "CAT",
-    name: "Classic Black",
-    price: "$340",
-    rating: "★★★★★",
-    stock: "In Stock",
-    image: require("../assets/images/watches/CAT_Watches.png"),
-    liked: true,
-  },
-  {
-    id: "4",
-    brand: "TOMMY HILFIGER",
-    name: "Luxury Silver",
-    price: "$410",
-    rating: "★★★★☆",
-    stock: "Only 2 Left",
-    image: require("../assets/images/watches/Tommy_Hilfiger.png"),
-    liked: true,
-  },
-];
-
 export default function Favorites({ navigation }: any) {
+  const dispatch = useAppDispatch();
+  const favoriteWatches = useAppSelector((state) => state.favorites.items);
+
   const renderItem = ({ item }: any) => {
     return (
-      <TouchableOpacity
-        activeOpacity={0.9}
-        style={styles.card}
-        // onPress={() =>
-        //   navigation.navigate("ProductDetail", {
-        //     product: item,
-        //   })
-        // }
-      >
-        {/* Heart */}
-
-        <TouchableOpacity style={styles.heartContainer}>
-          <Image
-            source={require("../assets/icons/HeartFill.png")}
-            style={styles.heart}
-          />
+      <View style={styles.card}>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => dispatch(removeFavorite(item.id))}
+        >
+          <Text style={styles.deleteText}>DELETE</Text>
         </TouchableOpacity>
 
-        {/* Image */}
+        <TouchableOpacity
+          activeOpacity={0.9}
+          style={styles.cardBody}
+          onPress={() => navigation.navigate("ProductDetail", { product: item })}
+        >
+          <Image
+            source={item.image}
+            resizeMode="contain"
+            style={styles.watchImage}
+          />
 
-        <Image
-          source={item.image}
-          resizeMode="contain"
-          style={styles.watchImage}
-        />
+          <Text style={styles.brand}>{item.brand}</Text>
+          <Text style={styles.name}>{item.name}</Text>
 
-        {/* Brand */}
-
-        <Text style={styles.brand}>
-          {item.brand}
-        </Text>
-
-        {/* Name */}
-
-        <Text style={styles.name}>
-          {item.name}
-        </Text>
-
-        {/* Rating */}
-
-        <Text style={styles.rating}>
-          {item.rating}
-        </Text>
-
-        {/* Stock */}
-
-        <View style={styles.stockBadge}>
-          <Text style={styles.stock}>
-            {item.stock}
-          </Text>
-        </View>
-
-        {/* Divider */}
-
-        <View style={styles.divider} />
-
-        {/* Bottom */}
-
-        <View style={styles.bottomRow}>
-          <View>
-            <Text style={styles.priceLabel}>
-              PRICE
-            </Text>
-
-            <Text style={styles.price}>
-              {item.price}
-            </Text>
+          <View style={styles.stockBadge}>
+            <Text style={styles.stock}>{item.warranty}</Text>
           </View>
 
-          <TouchableOpacity
-            style={styles.button}
-            // onPress={() =>
-            //   navigation.navigate("ProductDetail", {
-            //     product: item,
-            //   })
-            // }
-          >
-            <Text style={styles.buttonText}>
-              VIEW →
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </TouchableOpacity>
+          <View style={styles.divider} />
+
+          <View style={styles.bottomRow}>
+            <View>
+              <Text style={styles.priceLabel}>PRICE</Text>
+              <Text style={styles.price}>{item.price}</Text>
+            </View>
+
+            <View style={styles.button}>
+              <Text style={styles.buttonText}>VIEW →</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </View>
     );
   };
 
   return (
     <SafeAreaView style={styles.container}>
-
-      {/* Header */}
 
       <View style={styles.header}>
 
@@ -175,13 +92,21 @@ export default function Favorites({ navigation }: any) {
 
       </View>
 
-      <FlatList
-        data={favoriteWatches}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.list}
-      />
+      {favoriteWatches.length > 0 ?
+        (
+          <FlatList
+            data={favoriteWatches}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.list}
+          />
+        ) : (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No favorite watches yet.</Text>
+          </View>
+        )}
 
     </SafeAreaView>
   );
@@ -245,6 +170,28 @@ const styles = StyleSheet.create({
       height: 6,
     },
     elevation: 8,
+  },
+
+  cardBody: {
+    paddingTop: RH(0),
+  },
+
+  deleteButton: {
+    position: "absolute",
+    top: RH(12),
+    right: RW(12),
+    zIndex: 2,
+    backgroundColor: Colors.primary,
+    borderRadius: RS(8),
+    paddingHorizontal: RW(12),
+    paddingVertical: RH(8),
+  },
+
+  deleteText: {
+    color: Colors.secondary,
+    fontSize: RF(10),
+    fontFamily: Fonts.bold,
+    letterSpacing: RW(2),
   },
 
   heartContainer: {
@@ -363,4 +310,14 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bold,
     letterSpacing: RW(2),
   },
+  emptyContainer: {
+    flex: 1,
+    // minHeight: RH(560),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyText: {
+    color: "white",
+    fontSize: RF(20)
+  }
 });

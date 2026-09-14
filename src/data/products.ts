@@ -85,7 +85,7 @@ export const products = [
     ],
   },
   {
-    id: "3",
+    id: "4",
     brand: "BREMONT Watches",
     name: "Bremont Watches",
     shortName: "Bremont",

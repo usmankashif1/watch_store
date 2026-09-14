@@ -11,11 +11,13 @@ import {
 } from "react-native";
 
 import { RouteProp, useRoute } from "@react-navigation/native";
+import * as Haptics from "expo-haptics";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Fonts from "../constants/fonts";
 import type { RootStackParamList } from "../navigation/RootNavigation";
-import { useAppDispatch } from "../store/hooks";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { addToCart } from "../store/slices/cartSlice";
+import { toggleFavorite } from "../store/slices/favoritesSlice";
 import Colors from "../utlis/colors";
 import { RF, RH, RS, RW } from "../utlis/responsive";
 
@@ -27,22 +29,28 @@ export default function ProductDetail({ navigation }: any) {
     const specsScrollRef = useRef<ScrollView>(null);
     const descriptionScrollRef = useRef<ScrollView>(null);
 
-
     const dispatch = useAppDispatch();
+    const favoriteIds = useAppSelector((state) => state.favorites.items.map((item) => item.id));
+    const isFavorite = favoriteIds.includes(product.id);
 
     const handleAddToCart = () => {
-        console.log(product);
-
         dispatch(addToCart(product));
-
-
-        
     };
 
+    const handleToggleFavorite = () => {
+        dispatch(toggleFavorite(product));
+    };
 
-
+    const triggerArrowHaptic = async () => {
+        try {
+            await Haptics.selectionAsync();
+        } catch {
+            // fall back silently if native haptics is unavailable
+        }
+    };
 
     const scrollUp = () => {
+        triggerArrowHaptic();
         specsScrollRef.current?.scrollTo({
             y: 0,
             animated: true,
@@ -50,6 +58,7 @@ export default function ProductDetail({ navigation }: any) {
     };
 
     const scrollDown = () => {
+        triggerArrowHaptic();
         specsScrollRef.current?.scrollTo({
             y: RH(180),
             animated: true,
@@ -69,14 +78,18 @@ export default function ProductDetail({ navigation }: any) {
                         </TouchableOpacity>
 
                         <View style={styles.headerRight}>
-                            <Image
-                                source={require("../assets/icons/SearchIcon.png")}
-                                style={styles.headerIcon}
-                            />
-                            <Image
-                                source={require("../assets/icons/CartIcon.png")}
-                                style={[styles.headerIcon, { height: RS(30), width: RS(30) }]}
-                            />
+                            <TouchableOpacity onPress={() => navigation.navigate("Search")}>
+                                <Image
+                                    source={require("../assets/icons/SearchIcon.png")}
+                                    style={styles.headerIcon}
+                                />
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => navigation.navigate("Cart")}>
+                                <Image
+                                    source={require("../assets/icons/CartIcon.png")}
+                                    style={[styles.headerIcon, { height: RS(30), width: RS(30) }]}
+                                />
+                            </TouchableOpacity>
                         </View>
                     </View>
 
@@ -141,12 +154,17 @@ export default function ProductDetail({ navigation }: any) {
                             <TouchableOpacity
                                 style={styles.cartButton}
                                 onPress={handleAddToCart}
-                            >                                <Text style={styles.cartText}>ADD TO CART</Text>
+                            >
+                                <Text style={styles.cartText}>ADD TO CART</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.heartButton}>
+                            <TouchableOpacity style={styles.heartButton} onPress={handleToggleFavorite}>
                                 <Image
-                                    source={require("../assets/icons/HeartFill.png")}
+                                    source={
+                                        isFavorite
+                                            ? require("../assets/icons/HeartFill.png")
+                                            : require("../assets/icons/Heart.png")
+                                    }
                                     style={styles.heartIcon}
                                 />
                             </TouchableOpacity>
