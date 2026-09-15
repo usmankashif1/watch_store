@@ -1,5 +1,4 @@
 import RootNavigation from '@/src/navigation/RootNavigation'
-import OrderSuccess from '@/src/screens/OrderSuccess'
 import { persistor, store } from '@/src/store'
 import React from 'react'
 import { Provider } from 'react-redux'

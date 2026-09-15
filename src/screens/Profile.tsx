@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Image,
   StyleSheet,
@@ -9,14 +9,65 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import Colors from "../utlis/colors";
 import Fonts from "../constants/fonts";
+import { defaultProfile, loadProfile, saveProfile } from "../services/profileService";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { setProfile } from "../store/slices/profileSlice";
+import Colors from "../utlis/colors";
 import { RF, RH, RS, RW } from "../utlis/responsive";
 
 export default function Profile({ navigation }: any) {
-  const [name, setName] = useState("Usman Kashif");
-  const [email, setEmail] = useState("usman@gmail.com");
-  const [phone, setPhone] = useState("+92 300 1234567");
+  const dispatch = useAppDispatch();
+  const persistedProfile = useAppSelector((state) => state.profile);
+
+  const [name, setName] = useState(persistedProfile.fullName || defaultProfile.fullName);
+  const [email, setEmail] = useState(persistedProfile.email || defaultProfile.email);
+  const [phone, setPhone] = useState(persistedProfile.phone || defaultProfile.phone);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      setLoading(true);
+      try {
+        const profile = await loadProfile();
+        if (!mounted) return;
+        setName(profile.fullName);
+        setEmail(profile.email);
+        setPhone(profile.phone);
+        dispatch(setProfile(profile));
+      } catch {
+        if (!mounted) return;
+        setError("Could not load saved profile");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [dispatch]);
+
+  const handleSave = async () => {
+    setLoading(true);
+    setError(null);
+    setSaved(false);
+
+    try {
+      const nextProfile = { fullName: name, email, phone };
+      await saveProfile(nextProfile);
+      dispatch(setProfile(nextProfile));
+      setSaved(true);
+    } catch {
+      setError("Unable to save profile locally");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -78,8 +129,12 @@ export default function Profile({ navigation }: any) {
         />
       </View>
 
-      <TouchableOpacity style={styles.saveButton}>
-        <Text style={styles.saveText}>SAVE CHANGES</Text>
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      {saved ? <Text style={styles.successText}>Profile saved</Text> : null}
+      {loading ? <Text style={styles.loadingText}>Loading...</Text> : null}
+
+      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+        <Text style={styles.saveText}>{loading ? "SAVING..." : "SAVE CHANGES"}</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -146,6 +201,24 @@ const styles = StyleSheet.create({
     fontSize: RF(18),
     fontFamily: Fonts.bold,
     letterSpacing: RW(2),
+  },
+  errorText: {
+    color: "#FFB4B4",
+    fontFamily: Fonts.regular,
+    fontSize: RF(13),
+    marginBottom: RH(12),
+  },
+  successText: {
+    color: "#B3F7B8",
+    fontFamily: Fonts.regular,
+    fontSize: RF(13),
+    marginBottom: RH(12),
+  },
+  loadingText: {
+    color: Colors.primary,
+    fontFamily: Fonts.regular,
+    fontSize: RF(13),
+    marginBottom: RH(12),
   },
   header: {
     flexDirection: "row",

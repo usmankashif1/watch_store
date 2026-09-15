@@ -15,6 +15,7 @@ import * as Haptics from "expo-haptics";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Fonts from "../constants/fonts";
 import type { RootStackParamList } from "../navigation/RootNavigation";
+import { formatMoney } from "../services/productService";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { addToCart } from "../store/slices/cartSlice";
 import { toggleFavorite } from "../store/slices/favoritesSlice";
@@ -150,7 +151,7 @@ export default function ProductDetail({ navigation }: any) {
 
                             <View>
                                 <Text style={styles.priceLabel}>PRICE</Text>
-                                <Text style={styles.price}>{product.price}</Text>
+                                <Text style={styles.price}>{formatMoney(Number(product.price))}</Text>
                             </View>
                         </View>
 

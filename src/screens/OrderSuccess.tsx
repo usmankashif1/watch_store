@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -16,12 +16,12 @@ import { RF, RH, RS, RW } from "../utlis/responsive";
 export default function OrderSuccess({ navigation }: any) {
   const orderId = "#" + Math.floor(100000 + Math.random() * 900000);
 
-  const goHome = () => {
+  const goHome = useCallback(() => {
     navigation.reset({
       index: 0,
       routes: [{ name: "Home" }],
     });
-  };
+  }, [navigation]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (event: any) => {
@@ -32,7 +32,7 @@ export default function OrderSuccess({ navigation }: any) {
     });
 
     return unsubscribe;
-  }, [navigation]);
+  }, [goHome, navigation]);
 
   return (
     <SafeAreaView style={styles.container}>

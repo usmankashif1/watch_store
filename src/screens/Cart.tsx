@@ -1,11 +1,11 @@
 import React from "react";
 import {
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    FlatList,
+    Image,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
@@ -13,9 +13,9 @@ import { useSelector } from "react-redux";
 import Fonts from "../constants/fonts";
 import { useAppDispatch } from "../store/hooks";
 import {
-  decreaseQuantity,
-  increaseQuantity,
-  removeFromCart,
+    decreaseQuantity,
+    increaseQuantity,
+    removeFromCart,
 } from "../store/slices/cartSlice";
 import Colors from "../utlis/colors";
 import { RF, RH, RS, RW } from "../utlis/responsive";
@@ -67,7 +67,7 @@ export default function Cart({ navigation }: any) {
           </Text>
 
           <Text style={styles.emptySubtitle}>
-            Looks like you haven't added{"\n"}
+            Looks like you have not added{"\n"}
             any watches yet.
           </Text>
 
@@ -179,7 +179,7 @@ export default function Cart({ navigation }: any) {
           </Text>
 
           <Text style={styles.emptySubtitle}>
-            Looks like you haven't added any watches yet.
+            Looks like you have not added any watches yet.
           </Text>
 
           <TouchableOpacity

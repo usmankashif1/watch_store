@@ -13,7 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import ProductCard from "../components/ProductCard";
 import Fonts from "../constants/fonts";
-import { products } from "../data/products";
+import { productService } from "../services/productService";
 import Colors from "../utlis/colors";
 import { RF, RH, RS, RW } from "../utlis/responsive";
 
@@ -21,23 +21,23 @@ const Search = () => {
     const navigation = useNavigation<any>();
 
     const [search, setSearch] = useState("");
-    const [filteredProducts, setFilteredProducts] = useState(products);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [filteredProducts, setFilteredProducts] = useState(productService.getAllProducts());
 
     const handleSearch = (text: string) => {
         setSearch(text);
+        setLoading(true);
+        setError(null);
 
-        if (text.trim() === "") {
-            setFilteredProducts(products);
-            return;
+        try {
+            const result = productService.searchProducts(text);
+            setFilteredProducts(result);
+        } catch {
+            setError("Unable to search watches right now");
+        } finally {
+            setLoading(false);
         }
-
-        const result = products.filter(
-            (item) =>
-                item.name.toLowerCase().includes(text.toLowerCase()) ||
-                item.brand.toLowerCase().includes(text.toLowerCase())
-        );
-
-        setFilteredProducts(result);
     };
 
     return (
@@ -72,7 +72,16 @@ const Search = () => {
                 />
             </View>
 
-            {filteredProducts.length > 0 ? (
+            {error ? (
+                <View style={styles.emptyContainer}>
+                    <Text style={styles.emptyTitle}>Search Error</Text>
+                    <Text style={styles.emptySubtitle}>{error}</Text>
+                </View>
+            ) : loading ? (
+                <View style={styles.emptyContainer}>
+                    <Text style={styles.emptyTitle}>Searching...</Text>
+                </View>
+            ) : filteredProducts.length > 0 ? (
                 <FlatList
                     data={filteredProducts}
                     keyExtractor={(item) => item.id}

@@ -36,7 +36,7 @@ export type RootStackParamList = {
 export default function RootNavigation() {
     const [showSplash, setShowSplash] = useState(true);
 
-    const [fontsLoaded] = useFonts({
+    useFonts({
         KanitRegular: require("../assets/fonts/Kanit-Regular.ttf"),
         KanitMedium: require("../assets/fonts/Kanit-Medium.ttf"),
         KanitSemiBold: require("../assets/fonts/Kanit-SemiBold.ttf"),
@@ -48,8 +48,8 @@ export default function RootNavigation() {
             require("../assets/icons/BackgroundSplash.png"),
             require("../assets/icons/BackgroundTwo.png"),
             require("../assets/images/watches/Bremont.png"),
-            require("../assets/images/watches/CAT_Watches.png"),
-            require("../assets/images/watches/Thommen_Watches.png"),
+            require("../assets/images/watches/CAT.png"),
+            require("../assets/images/watches/Thommen.png"),
             require("../assets/images/watches/Zurich_Mauriac.png"),
         ]);
     }, []);

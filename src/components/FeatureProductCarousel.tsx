@@ -6,11 +6,10 @@ import {
     Text,
     TouchableOpacity,
     View,
-    ViewToken,
 } from "react-native";
 
-import Colors from "../utlis/colors";
 import Fonts from "../constants/fonts";
+import Colors from "../utlis/colors";
 import { RF, RH, RS, RW } from "../utlis/responsive";
 
 type FeatureProduct = {

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import {
     FlatList,
     Image,
@@ -18,12 +18,12 @@ import { RF, RH, RS, RW } from "../utlis/responsive";
 export default function MyOrders({ navigation }: any) {
     const orders = useSelector((state: RootState) => state.orders.items);
 
-    const goHome = () => {
+    const goHome = useCallback(() => {
         navigation.reset({
             index: 0,
             routes: [{ name: "Home" }],
         });
-    };
+    }, [navigation]);
 
     useEffect(() => {
         const unsubscribe = navigation.addListener("beforeRemove", (event: any) => {
@@ -34,7 +34,7 @@ export default function MyOrders({ navigation }: any) {
         });
 
         return unsubscribe;
-    }, [navigation]);
+    }, [goHome, navigation]);
 
     const renderItem = ({ item }: any) => {
         const firstItem = item.items?.[0];

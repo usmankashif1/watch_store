@@ -1,19 +1,20 @@
 import React, { useMemo, useState } from "react";
 import {
-  Image,
-  ImageBackground,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Image,
+    ImageBackground,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
 import Fonts from "../constants/fonts";
+import { makeOrderDraft } from "../services/orderService";
 import type { RootState } from "../store";
 import { useAppDispatch } from "../store/hooks";
 import { clearCart } from "../store/slices/cartSlice";
@@ -28,6 +29,8 @@ export default function Checkout({ navigation }: any) {
   const tax = subtotal * 0.08;
   const shipping = subtotal > 0 ? 0 : 0;
   const total = subtotal + tax + shipping;
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("cash");
   const [customer, setCustomer] = useState({
@@ -67,24 +70,35 @@ export default function Checkout({ navigation }: any) {
   };
 
   const handlePlaceOrder = () => {
-    if (!validate()) return;
-    if (!cartItems.length) return;
+    if (!validate()) {
+      setCheckoutError("Please complete all checkout fields");
+      return;
+    }
 
-    const newOrder = {
-      id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
-      customer,
-      items: cartItems,
-      total,
-      tax,
-      shipping,
-      paymentMethod,
-      createdAt: new Date().toISOString(),
-      status: "Processing",
-    };
+    if (!cartItems.length) {
+      setCheckoutError("Your cart is empty");
+      return;
+    }
 
-    dispatch(addOrder(newOrder));
-    dispatch(clearCart());
-    navigation.navigate("OrderSuccess");
+    setCheckoutError(null);
+    setSubmitting(true);
+
+    try {
+      const newOrder = makeOrderDraft(customer, cartItems, paymentMethod, {
+        subtotal,
+        tax,
+        shipping,
+        total,
+      });
+
+      dispatch(addOrder(newOrder));
+      dispatch(clearCart());
+      navigation.navigate("OrderSuccess");
+    } catch {
+      setCheckoutError("Unable to place the order right now");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -248,6 +262,8 @@ export default function Checkout({ navigation }: any) {
               </View>
             </TouchableOpacity>
 
+            {checkoutError ? <Text style={styles.checkoutError}>{checkoutError}</Text> : null}
+
             {paymentMethod === "card" && (
               <View style={styles.cardSection}>
                 <View style={styles.inputGroup}>
@@ -295,8 +311,8 @@ export default function Checkout({ navigation }: any) {
               </View>
             )}
 
-            <TouchableOpacity style={styles.placeOrderButton} onPress={handlePlaceOrder}>
-              <Text style={styles.placeOrderText}>PLACE ORDER</Text>
+<TouchableOpacity style={styles.placeOrderButton} onPress={handlePlaceOrder} disabled={submitting}>
+                <Text style={styles.placeOrderText}>{submitting ? "PROCESSING..." : "PLACE ORDER"}</Text>
             </TouchableOpacity>
 
             <Text style={styles.secureText}>Your information is safe and secure</Text>
@@ -470,6 +486,12 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
     textAlign: "center",
     marginTop: RH(12),
+  },
+  checkoutError: {
+    color: "#FFB4B4",
+    fontSize: RF(14),
+    fontFamily: Fonts.regular,
+    marginBottom: RH(8),
   },
   inputError: {
     borderColor: "#FF6B6B",

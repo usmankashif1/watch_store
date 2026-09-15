@@ -1,30 +1,28 @@
 import {
     FlatList,
-    Image,
     ScrollView,
     StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+    View
 } from "react-native";
 
 import Animated, { Extrapolation, interpolate, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from "react-native-safe-area-context";
+import Drawer from "../components/Drawer";
+import FeatureProductCarousel from "../components/FeatureProductCarousel";
 import Header from "../components/Header";
+import Overlay from "../components/Overlay";
 import ProductCard from "../components/ProductCard";
 import SectionHeader from "../components/SectionHeader";
 import Fonts from "../constants/fonts";
-import { products } from "../data/products";
+import { featureProducts } from "../data/featureProducts";
+import { productService } from "../services/productService";
 import Colors from "../utlis/colors";
 import { RF, RH, RS, RW } from "../utlis/responsive";
-import Overlay from "../components/Overlay";
-import Drawer from "../components/Drawer";
-import FeatureProductCarousel from "../components/FeatureProductCarousel";
-import { featureProducts } from "../data/featureProducts";
 
 
 export default function Home({ navigation }: any) {
     const active = useSharedValue(false)
+    const products = productService.getAllProducts();
 
     const progress = useDerivedValue(() => {
         return withTiming(active.value ? 1 : 0)
@@ -75,30 +73,7 @@ export default function Home({ navigation }: any) {
 
                         <SectionHeader smallTitle="FEATURED" title="PRODUCTS" />
 
-                        {/* <View style={styles.featureCard}>
-                            <View style={styles.featureTextBox}>
-                                <Text style={styles.arrival}>New Arrival</Text>
-                                <Text style={styles.featureTitle}>BREMONT</Text>
-
-                                <Text style={styles.featureDesc}>
-                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit
-                                </Text>
-
-                                <TouchableOpacity style={styles.buyButton}>
-                                    <Text style={styles.buyText}>BUY NOW</Text>
-                                    <Image
-                                        source={require("../assets/icons/NextButtonIcons.png")}
-                                        style={styles.arrowIcon}
-                                    />
-                                </TouchableOpacity>
-                            </View>
-
-                            <Image
-                                source={require("../assets/images/watches/Bremont.png")}
-                                style={styles.featureWatch}
-                                resizeMode="contain"
-                            />
-                        </View> */}
+                    
 
 
 

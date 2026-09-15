@@ -1,21 +1,26 @@
 import React from 'react'
 import { Image, StyleSheet, Text, View } from 'react-native'
+import { SharedValue } from 'react-native-reanimated'
+import { DRAWER_LIST } from '../data/DrawerList'
+import { defaultProfile } from '../services/profileService'
+import { useAppSelector } from '../store/hooks'
 import Colors from '../utlis/colors'
 import { RF, RH, RW } from '../utlis/responsive'
-import { DRAWER_LIST } from '../data/DrawerList'
 import DrawerItem from './DrawerItem'
-import { SharedValue } from 'react-native-reanimated'
 
 type Props = {
     active: SharedValue<boolean>
 }
 
 const Drawer = ({ active }: Props) => {
+    const profile = useAppSelector((state) => state.profile)
+    const userName = profile.fullName || defaultProfile.fullName
+
     return (
         <View style={styles.container}>
             <View style={styles.LogoUserContainer}>
                 <Image style={styles.drawerLogo} source={require("../assets/icons/Logo.png")} />
-                <Text style={styles.userName}>Usman Kashif</Text>
+                <Text style={styles.userName}>{userName}</Text>
             </View>
             <View style={styles.menuContainer}>
                 {DRAWER_LIST.map((item) => (

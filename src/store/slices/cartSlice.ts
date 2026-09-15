@@ -5,13 +5,8 @@ const initialState: { items: CartItem[] } = {
   items: [],
 };
 
-const priceToNumber = (price: string | number) => {
-  if (typeof price === "number") {
-    return price;
-  }
-
-  const parsed = Number(String(price).replace(/[^0-9.]/g, ""));
-  return Number.isFinite(parsed) ? parsed : 0;
+const priceToNumber = (price: number) => {
+  return Number.isFinite(price) ? price : 0;
 };
 
 const cartSlice = createSlice({
