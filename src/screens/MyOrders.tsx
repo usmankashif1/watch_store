@@ -107,20 +107,23 @@ export default function MyOrders({ navigation }: any) {
                 <View style={{ width: RS(28) }} />
             </View>
 
-            <FlatList
-                data={orders}
-                keyExtractor={(item) => item.id}
-                renderItem={renderItem}
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{
-                    paddingBottom: RH(30),
-                }}
-                ListEmptyComponent={
-                    <View style={styles.emptyRow}>
-                        <Text style={styles.emptyTitle}>No orders placed yet</Text>
-                    </View>
-                }
-            />
+            {orders.length > 0 ?
+
+                <FlatList
+                    data={orders}
+                    keyExtractor={(item) => item.id}
+                    renderItem={renderItem}
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{
+                        paddingBottom: RH(30),
+                    }}
+                />
+                :
+                <View style={styles.emptyRow}>
+                    <Text style={styles.emptyTitle}>No orders placed yet</Text>
+                </View>
+            }
+
         </SafeAreaView>
     );
 }
@@ -266,13 +269,15 @@ const styles = StyleSheet.create({
     },
 
     emptyRow: {
-        paddingTop: RH(80),
+        // paddingTop: RH(80),
+        flex:1,
         alignItems: "center",
+        justifyContent:"center"
     },
 
     emptyTitle: {
         color: Colors.white,
-        fontSize: RF(16),
+        fontSize: RF(20),
         fontFamily: Fonts.regular,
     },
 });
